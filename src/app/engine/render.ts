@@ -149,7 +149,7 @@ export async function newRender({
       })
       */
 
-      const res = await fetch(`${serverOpenaiApiBaseUrl}/chat/completions`, {
+      const res = await fetch(`${serverOpenaiApiBaseUrl}/images/generations`, {
         method: "POST",
         headers: {
           Accept: "application/json",
