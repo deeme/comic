@@ -77,27 +77,25 @@ export function SettingsDialog() {
       <DialogTrigger asChild>
         <Button className="space-x-1 md:space-x-2">
           <div>
-            <span className="hidden md:inline">设置</span>
+            <span className="hidden md:inline">Custom models</span>
           </div>
         </Button> 
       </DialogTrigger>
       <DialogContent className="w-full sm:max-w-[500px] md:max-w-[700px] overflow-y-auto h-max-[100vh] md:h-max-[80vh]">
         <DialogHeader>
           <DialogDescription className="w-full text-center text-lg font-bold text-stone-800">
-            自定义设置
+            Custom Models
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-1 space-y-1 text-stone-800">
-
           <p className="text-sm text-zinc-700">
-            提醒：当启用定制模型或较少用到的模型时，许多服务供应商需要一段时间的预热。如果遇到这种情况，请耐心等待5分钟之后再试。 
+            Note: most vendors have a warm-up delay when using a custom or rarely used model. Do not hesitate to try again after 5 minutes if that happens.
           </p>
           <p className="text-sm text-zinc-700">
-            安全须知：我们不会在服务器端保留这些配置信息，它们将通过本地存储功能直接保存在您的网页浏览器里。 
+            Security note: we do not save your API credentials on our server but inside your web browser, using the local storage.
           </p>
-
           <Field>
-            <Label>图片供应商:</Label>
+            <Label>Image rendering provider:</Label>
             <Select
               onValueChange={(value: string) => {
                 setRenderingModelVendor(value as RenderingModelVendor)
@@ -107,25 +105,37 @@ export function SettingsDialog() {
                 <SelectValue placeholder="Theme" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SERVER">使用服务器设置（默认）</SelectItem>
-                <SelectItem value="HUGGINGFACE">使用自定义的 Hugging Face 模型（推荐）</SelectItem>
-                <SelectItem value="REPLICATE">选择自定义 Replicate 模型（将使用您自己的账户）</SelectItem>
-                <SelectItem value="OPENAI">选用 OpenAI 的 DALL·E 3（支持度有限，需要使用您的个人账户）</SelectItem>
+                <SelectItem value="SERVER">Use server settings (default)</SelectItem>
+                <SelectItem value="HUGGINGFACE">Custom Hugging Face model (recommended)</SelectItem>
+                <SelectItem value="REPLICATE">Custom Replicate model (will use your own account)</SelectItem>
+                <SelectItem value="OPENAI">DALL·E 3 by OpenAI (partial support, will use your own account)</SelectItem>
               </SelectContent>
             </Select>
           </Field>
-
-          {renderingModelVendor === "SERVER" && <>
+            
+          
+          {
+          renderingModelVendor === "SERVER" && <>
             <Field>
-              <Label>考虑质量相对于性能的比重:</Label>
+              <Label>Quality over performance ratio (beta, deprecated):</Label>
               <div className="flex flex-row space-x-2 text-zinc-500">
                 <Switch
-                  checked={renderingUseTurbo}
-                  onCheckedChange={setRenderingUseTurbo}
+                  // checked={renderingUseTurbo}
+                  // onCheckedChange={setRenderingUseTurbo}
+                  checked={false}
+                  disabled
+                  className="opacity-30 pointer-events-none"
                 />
+                {/*
                 <span
                   onClick={() => setRenderingUseTurbo(!renderingUseTurbo)}
-                  className={cn("cursor-pointer", { "text-zinc-800": renderingUseTurbo })}>使用快速但画质较低的模型（默认） &nbsp; ⬅️ 关闭此选项可以提升质量!</span>
+                  className={cn("cursor-pointer", { "text-zinc-800": renderingUseTurbo })}>
+                    Use a faster, but lower quality model (you are warned!)
+                  </span>
+              */}
+              <span className="text-zinc-500 italic">
+                Following feedbacks from users (low rendering quality on comics) the fast renderer has been disabled.
+              </span>
               </div>
             </Field>
           </>}

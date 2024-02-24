@@ -78,8 +78,11 @@ export function BottomBar() {
         `space-x-3`,
         `scale-[0.9]`
       )}>
-
-
+        <About />
+       {/* 
+       Thank you clip factory for your service 🫡
+       <AIClipFactory />
+       */}
       </div>
       <div className={cn(
       `flex flex-row`,
@@ -90,6 +93,14 @@ export function BottomBar() {
       `scale-[0.9]`
     )}>
       <SettingsDialog />
+      {/*<Button
+        onClick={handleUpscale}
+        disabled={!prompt?.length || remainingImages > 0 || isUpscaling || !Object.values(upscaleQueue).length}
+      >
+        {isUpscaling
+            ? `${allStatus.length - Object.values(upscaleQueue).length}/${allStatus.length} ⌛`
+            : "Upscale"}
+        </Button>*/}
 
         {/*
         <div>
@@ -119,14 +130,13 @@ export function BottomBar() {
             disabled={!prompt?.length}
           >
             <span className="hidden md:inline">{
-            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `保存 PDF`
+            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `Save PDF`
             }</span>
             <span className="inline md:hidden">{
-              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`
+              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `Save`
             }</span>
         </Button>
-
-
+        <Share />
       </div>
     </div>
   )

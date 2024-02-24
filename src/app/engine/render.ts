@@ -25,13 +25,14 @@ const serverReplicateApiModelTrigger = `${process.env.RENDERING_REPLICATE_API_MO
 const videochainToken = `${process.env.AUTH_VIDEOCHAIN_API_TOKEN || ""}`
 const videochainApiUrl = `${process.env.RENDERING_VIDEOCHAIN_API_URL || ""}`
 
-const serverOpenaiApiKey = `${process.env.RENDERING_OPENAI_API_KEY || ""}`
+const serverOpenaiApiKey = `${process.env.AUTH_OPENAI_API_KEY || ""}`
 const serverOpenaiApiBaseUrl = `${process.env.RENDERING_OPENAI_API_BASE_URL || "https://api.openai.com/v1"}`
 const serverOpenaiApiModel = `${process.env.RENDERING_OPENAI_API_MODEL || "dall-e-3"}`
 
 export async function newRender({
   prompt,
   // negativePrompt,
+  nbFrames,
   width,
   height,
   withCache,
@@ -41,6 +42,7 @@ export async function newRender({
   // negativePrompt: string[]
   width: number
   height: number
+  nbFrames: number
   withCache: boolean
   settings: Settings
 }) {
@@ -147,9 +149,9 @@ export async function newRender({
         size: size as any,
         // quality: "standard",
       })
-      */
 
-      const res = await fetch(`${serverOpenaiApiBaseUrl}/chat/completions`, {
+
+      const res = await fetch(`${serverOpenaiApiBaseUrl}/images/generations`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -167,6 +169,24 @@ export async function newRender({
       // we can also use this (see https://vercel.com/blog/vercel-cache-api-nextjs-cache)
       // next: { revalidate: 1 }
       })
+      */
+  const openai = new OpenAI({
+    apiKey: openaiApiKey,
+    baseURL: serverOpenaiApiBaseUrl,
+  })
+
+  try {
+    const res = await openai.chat.completions.create({
+      messages: prompt,
+      model: openaiApiModel,
+    })
+
+    return res.choices[0].message.content || ""
+  } catch (err) {
+    console.error(`error during generation: ${err}`)
+    return ""
+  }
+
 
       if (res.status !== 200) {
         throw new Error('Failed to fetch data')
@@ -357,31 +377,7 @@ export async function newRender({
         segments: []
       } as RenderedScene
     } else {
-      /*
-      console.log("sending:", {
-        prompt,
-        // negativePrompt, unused for now
-        nbFrames: 1,
-        nbSteps: nbInferenceSteps, // 20 = fast, 30 = better, 50 = best
-        actionnables: [], // ["text block"],
-        segmentation: "disabled", // "firstframe", // one day we will remove this param, to make it automatic
-        width,
-        height,
-
-        // no need to upscale right now as we generate tiny panels
-        // maybe later we can provide an "export" button to PDF
-        // unfortunately there are too many requests for upscaling,
-        // the server is always down
-        upscalingFactor: 1, // 2,
-
-        turbo: settings.renderingUseTurbo,
-
-        // analyzing doesn't work yet, it seems..
-        analyze: false, // analyze: true,
-
-        cache: "ignore"
-      })
-      */
+  
       const res = await fetch(`${videochainApiUrl}${videochainApiUrl.endsWith("/") ? "" : "/"}render`, {
         method: "POST",
         headers: {
@@ -392,7 +388,9 @@ export async function newRender({
         body: JSON.stringify({
           prompt,
           // negativePrompt, unused for now
-          nbFrames: 1,
+
+          nbFrames,
+
           nbSteps: nbInferenceSteps, // 20 = fast, 30 = better, 50 = best
           actionnables: [], // ["text block"],
           segmentation: "disabled", // "firstframe", // one day we will remove this param, to make it automatic
@@ -405,7 +403,9 @@ export async function newRender({
           // the server is always down
           upscalingFactor: 1, // 2,
 
-          turbo: settings.renderingUseTurbo,
+          // let's completely disable turbo mode, it doesn't work well for drawings and comics,
+          // basically all the people I talked to said it sucked
+          turbo: false, // settings.renderingUseTurbo,
 
           // analyzing doesn't work yet, it seems..
           analyze: false, // analyze: true,
