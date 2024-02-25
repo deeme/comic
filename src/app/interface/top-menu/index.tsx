@@ -163,8 +163,8 @@ export function TopMenu() {
           onCheckedChange={setShowCaptions}
         />
         <Label>
-          <span className="hidden md:inline">Caption</span>
-          <span className="inline md:hidden">Cap.</span>
+          <span className="hidden md:inline">字幕</span>
+          <span className="inline md:hidden">字幕</span>
         </Label>
         </div>
         {/*
@@ -202,7 +202,7 @@ export function TopMenu() {
         <div className="flex flex-row flex-grow w-full">
           <div className="flex flex-row flex-grow w-full">
             <Input
-              placeholder="1. Story prompt"
+              placeholder="1.故事prompt"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 rounded-r-none border-r-stone-100"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {
@@ -216,7 +216,7 @@ export function TopMenu() {
               value={draftPromptB}
             />
             <Input
-              placeholder="2. Style/character prompt"
+              placeholder="2.风格角色prompt"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 border-l-stone-100 rounded-l-none rounded-r-none"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {

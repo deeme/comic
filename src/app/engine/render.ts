@@ -149,7 +149,7 @@ export async function newRender({
         size: size as any,
         // quality: "standard",
       })
-
+      */
 
       const res = await fetch(`${serverOpenaiApiBaseUrl}/images/generations`, {
         method: "POST",
@@ -169,24 +169,6 @@ export async function newRender({
       // we can also use this (see https://vercel.com/blog/vercel-cache-api-nextjs-cache)
       // next: { revalidate: 1 }
       })
-      */
-  const openai = new OpenAI({
-    apiKey: openaiApiKey,
-    baseURL: serverOpenaiApiBaseUrl,
-  })
-
-  try {
-    const res = await openai.chat.completions.create({
-      messages: prompt,
-      model: openaiApiModel,
-    })
-
-    return res.choices[0].message.content || ""
-  } catch (err) {
-    console.error(`error during generation: ${err}`)
-    return ""
-  }
-
 
       if (res.status !== 200) {
         throw new Error('Failed to fetch data')

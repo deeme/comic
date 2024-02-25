@@ -28,7 +28,7 @@ export interface Preset {
 export const presets: Record<string, Preset> = {
   random: {
     id: "random",
-    label: "Random style",
+    label: "随机风格",
     family: "european",
     color: "color",
     font: "actionman",
@@ -38,7 +38,7 @@ export const presets: Record<string, Preset> = {
   },
   neutral: {
     id: "neutral",
-    label: "Neutral (no style)",
+    label: "无风格",
     family: "american",
     color: "color",
     font: "actionman",
@@ -47,6 +47,52 @@ export const presets: Record<string, Preset> = {
       prompt,
     ],
     negativePrompt: () => [ ],
+  },
+  chinese: {
+    id: "chinese",
+    label: "日常",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "电影，输出为中文",
+    imagePrompt: (prompt: string) => [
+      `中国生活场景`,
+      prompt,
+      "intricate"
+    ],
+    negativePrompt: () => [
+      "photo",
+      "电影画质",
+      "高清"
+    ],
+  },
+  chinese_manga: {
+    id: "chinese_manga",
+    label: "Chinese",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "chinese manga",
+    imagePrompt: (prompt: string) => [
+      `digital color comicbook style`,
+      `detailed drawing`,
+      `chinese manga`,
+      prompt,
+      // "single panel",
+      // "manga",
+      //  "chinese",
+      "intricate",
+      // "detailed",
+      // "drawing"
+    ],
+    negativePrompt: () => [
+      "color album",
+      "color",
+      "chinese comic",
+      "photo",
+      "painting",
+      "3D render"
+    ],
   },
   /*
   video_3d_style: {
@@ -93,7 +139,7 @@ export const presets: Record<string, Preset> = {
   },
   nihonga: {
     id: "nihonga",
-    label: "Nihonga",
+    label: "传统日式",
     family: "asian",
     color: "color",
     font: "actionman",
@@ -121,7 +167,7 @@ export const presets: Record<string, Preset> = {
   },
   franco_belgian: {
     id: "franco_belgian",
-    label: "Franco-Belgian",
+    label: "法比风格",
     family: "european",
     color: "color",
     font: "actionman",
@@ -147,7 +193,7 @@ export const presets: Record<string, Preset> = {
   },
   american_comic_90: {
     id: "american_comic_90",
-    label: "American (modern)",
+    label: "美式现代",
     family: "american",
     color: "color",
     font: "actionman",
@@ -178,7 +224,7 @@ export const presets: Record<string, Preset> = {
 
   /*
   american_comic_40: {
-    label: "American (1940)",
+    label: "美式1940",
     family: "american",
     color: "color",
     font: "actionman",
@@ -209,7 +255,7 @@ export const presets: Record<string, Preset> = {
   */
   american_comic_50: {
     id: "american_comic_50",
-    label: "American (1950)",
+    label: "美式1950",
     family: "american",
     color: "color",
     font: "actionman",
@@ -239,7 +285,7 @@ export const presets: Record<string, Preset> = {
   },
   /*
   american_comic_60: {
-    label: "American (1960)",
+    label: "美式1960",
     family: "american",
     color: "color",
     font: "actionman",
@@ -301,7 +347,7 @@ export const presets: Record<string, Preset> = {
  
   humanoid: {
     id: "humanoid",
-    label: "Humanoid",
+    label: "机器人",
     family: "european",
     color: "color",
     font: "actionman",
