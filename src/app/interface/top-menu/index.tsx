@@ -181,8 +181,8 @@ export function TopMenu() {
           onCheckedChange={setShowCaptions}
         />
         <Label>
-          <span className="hidden md:inline">×ÖÄ»</span>
-          <span className="inline md:hidden">×ÖÄ»</span>
+          <span className="hidden md:inline">å­—å¹•</span>
+          <span className="inline md:hidden">å­—å¹•</span>
         </Label>
         </div>
         {/*
@@ -220,7 +220,7 @@ export function TopMenu() {
         <div className="flex flex-row flex-grow w-full">
           <div className="flex flex-row flex-grow w-full">
             <Input
-              placeholder="1.¹ÊÊÂ(eg. detective dog)"
+              placeholder="1.æ•…äº‹(eg. detective dog)"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 rounded-r-none border-r-stone-100"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {
@@ -234,7 +234,7 @@ export function TopMenu() {
               value={draftPromptB}
             />
             <Input
-              placeholder="2.·ç¸ñ½ÇÉ«(eg 'rain, shiba')"
+              placeholder="2.é£Žæ ¼è§’è‰²(eg 'rain, shiba')"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 border-l-stone-100 rounded-l-none rounded-r-none"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {
