@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { StaticImageData } from "next/image"
+import { useLocalStorage } from "usehooks-ts"
 
 import {
   Select,
@@ -19,13 +21,16 @@ import { PresetName, defaultPreset, nonRandomPresets, presets } from "@/app/engi
 import { useStore } from "@/app/store"
 import { Button } from "@/components/ui/button"
 import { LayoutName, allLayoutLabels, defaultLayout, nonRandomLayouts } from "@/app/layouts"
+import { Switch } from "@/components/ui/switch"
+import { useOAuth } from "@/lib/useOAuth"
 
 import layoutPreview0 from "../../../../public/layouts/layout0.jpg"
 import layoutPreview1 from "../../../../public/layouts/layout1.jpg"
 import layoutPreview2 from "../../../../public/layouts/layout2.jpg"
 import layoutPreview3 from "../../../../public/layouts/layout3.jpg"
-import { StaticImageData } from "next/image"
-import { Switch } from "@/components/ui/switch"
+import { localStorageKeys } from "../settings-dialog/localStorageKeys"
+import { defaultSettings } from "../settings-dialog/defaultSettings"
+import { AuthWall } from "../auth-wall"
 
 const layoutIcons: Partial<Record<LayoutName, StaticImageData>> = {
   Layout0: layoutPreview0,
@@ -65,9 +70,22 @@ export function TopMenu() {
 
   const [draftPreset, setDraftPreset] = useState<PresetName>(requestedPreset)
   const [draftLayout, setDraftLayout] = useState<LayoutName>(requestedLayout)
+  
+  const { isLoggedIn, enableOAuthWall } = useOAuth({ debug: false })
+  
+  const [hasGeneratedAtLeastOnce, setHasGeneratedAtLeastOnce] = useLocalStorage<boolean>(
+    localStorageKeys.hasGeneratedAtLeastOnce,
+    defaultSettings.hasGeneratedAtLeastOnce
+  )
+
+  const [showAuthWall, setShowAuthWall] = useState(false)
 
   const handleSubmit = () => {
-
+    if (enableOAuthWall && hasGeneratedAtLeastOnce && !isLoggedIn) {
+      setShowAuthWall(true)
+      return
+    }
+    
     const promptChanged = draftPrompt.trim() !== prompt.trim()
     const presetChanged = draftPreset !== preset.id
     const layoutChanged = draftLayout !== layout
@@ -163,8 +181,8 @@ export function TopMenu() {
           onCheckedChange={setShowCaptions}
         />
         <Label>
-          <span className="hidden md:inline">å­—å¹•</span>
-          <span className="inline md:hidden">å­—å¹•</span>
+          <span className="hidden md:inline">×ÖÄ»</span>
+          <span className="inline md:hidden">×ÖÄ»</span>
         </Label>
         </div>
         {/*
@@ -202,7 +220,7 @@ export function TopMenu() {
         <div className="flex flex-row flex-grow w-full">
           <div className="flex flex-row flex-grow w-full">
             <Input
-              placeholder="1.æ•…äº‹prompt"
+              placeholder="1.¹ÊÊÂ(eg. detective dog)"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 rounded-r-none border-r-stone-100"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {
@@ -216,7 +234,7 @@ export function TopMenu() {
               value={draftPromptB}
             />
             <Input
-              placeholder="2.é£Žæ ¼è§’è‰²prompt"
+              placeholder="2.·ç¸ñ½ÇÉ«(eg 'rain, shiba')"
               className="w-1/2 bg-neutral-300 text-neutral-800 dark:bg-neutral-300 dark:text-neutral-800 border-l-stone-100 rounded-l-none rounded-r-none"
               // disabled={atLeastOnePanelIsBusy}
               onChange={(e) => {
@@ -230,19 +248,21 @@ export function TopMenu() {
               value={draftPromptA}
             />
           </div>
-          <Button
-          className={cn(
-            `rounded-l-none cursor-pointer`,
-            `transition-all duration-200 ease-in-out`,
-            `bg-[rgb(59,134,247)] hover:bg-[rgb(69,144,255)] disabled:bg-[rgb(59,134,247)]`
-            )}
-          onClick={() => {
-            handleSubmit()
-          }}
-          disabled={!draftPrompt?.trim().length || isBusy}
-        >
-          Go
-        </Button>
+            <Button
+            className={cn(
+              `rounded-l-none cursor-pointer`,
+              `transition-all duration-200 ease-in-out`,
+              `bg-[rgb(59,134,247)] hover:bg-[rgb(69,144,255)] disabled:bg-[rgb(59,134,247)]`
+              )}
+            onClick={() => {
+              handleSubmit()
+            }}
+            disabled={!draftPrompt?.trim().length || isBusy}
+          >
+            Go
+          </Button>
+
+          <AuthWall show={showAuthWall} />
         </div>
       </div>
       {/*

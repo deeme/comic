@@ -8,7 +8,7 @@ export const getStoryContinuation = async ({
   stylePrompt = "",
   userStoryPrompt = "",
   nbPanelsToGenerate = 2,
-  nbTotalPanels = 8,
+  nbTotalPanels = 4,
   existingPanels = [],
 }: {
   preset: Preset;

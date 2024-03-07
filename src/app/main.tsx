@@ -3,36 +3,48 @@
 import { useEffect, useState, useTransition } from "react"
 
 import { cn } from "@/lib/utils"
-import { TopMenu } from "./interface/top-menu"
 import { fonts } from "@/lib/fonts"
+import { GeneratedPanel } from "@/types"
+import { joinWords } from "@/lib/joinWords"
+
+import { TopMenu } from "./interface/top-menu"
 import { useStore } from "./store"
 import { Zoom } from "./interface/zoom"
 import { BottomBar } from "./interface/bottom-bar"
 import { Page } from "./interface/page"
-import { GeneratedPanel } from "@/types"
-import { joinWords } from "@/lib/joinWords"
 import { getStoryContinuation } from "./queries/getStoryContinuation"
+import { useDynamicConfig } from "@/lib/useDynamicConfig"
 
 export default function Main() {
   const [_isPending, startTransition] = useTransition()
 
-  const isGeneratingStory = useStore(state => state.isGeneratingStory)
-  const setGeneratingStory = useStore(state => state.setGeneratingStory)
+  const { config, isConfigReady } = useDynamicConfig()
+  const isGeneratingStory = useStore(s => s.isGeneratingStory)
+  const setGeneratingStory = useStore(s => s.setGeneratingStory)
 
-  const font = useStore(state => state.font)
-  const preset = useStore(state => state.preset)
-  const prompt = useStore(state => state.prompt)
+  const font = useStore(s => s.font)
+  const preset = useStore(s => s.preset)
+  const prompt = useStore(s => s.prompt)
 
-  const nbPages = useStore(state => state.nbPages)
-  const nbTotalPanels = useStore(state => state.nbTotalPanels)
+  const nbPages = useStore(s => s.nbPages)
+  const nbPanelsPerPage = useStore(s => s.nbPanelsPerPage)
+  const nbTotalPanels = useStore(s => s.nbTotalPanels)
+  const setNbPages = useStore(s => s.setNbPages)
+  const setNbPanelsPerPage = useStore(s => s.setNbPanelsPerPage)
 
-  const setPanels = useStore(state => state.setPanels)
-  const setCaptions = useStore(state => state.setCaptions)
+  const setPanels = useStore(s => s.setPanels)
+  const setCaptions = useStore(s => s.setCaptions)
 
-  const zoomLevel = useStore(state => state.zoomLevel)
+  const zoomLevel = useStore(s => s.zoomLevel)
 
   const [waitABitMore, setWaitABitMore] = useState(false)
 
+  useEffect(() => {
+    if (isConfigReady) {
+      setNbPages(config.maxNbPages)
+      setNbPanelsPerPage(config.nbPanelsPerPage)
+    }
+  }, [JSON.stringify(config), isConfigReady])
   // react to prompt changes
   useEffect(() => {
     if (!prompt) { return }
@@ -68,6 +80,7 @@ export default function Main() {
       const newPanelsPrompts: string[] = []
       const newCaptions: string[] = []
 
+      // we always generate panels 2 by 2
       const nbPanelsToGenerate = 2
 
       for (
@@ -134,7 +147,7 @@ export default function Main() {
       */
  
     })
-  }, [prompt, preset?.label, nbTotalPanels]) // important: we need to react to preset changes too
+  }, [prompt, preset?.label, nbPages, nbPanelsPerPage, nbTotalPanels]) // important: we need to react to preset changes too
 
   return (
     <div>
@@ -160,9 +173,7 @@ export default function Main() {
             style={{
               width: `${zoomLevel}%`
             }}>
-            <Page page={0} />
-
-            <Page page={1} />
+            {Array(nbPages).fill(0).map((_, i) => <Page key={i} page={i} />)}
           </div>
         </div>
       </div>

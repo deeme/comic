@@ -3,6 +3,7 @@ import { RenderingModelVendor, Settings } from "@/types"
 export const defaultSettings: Settings = {
   renderingModelVendor: "SERVER" as RenderingModelVendor,
   renderingUseTurbo: false,
+  huggingFaceOAuth: "",
   huggingfaceApiKey: "",
   huggingfaceInferenceApiModel: "stabilityai/stable-diffusion-xl-base-1.0",
   huggingfaceInferenceApiModelTrigger: "",
@@ -13,4 +14,8 @@ export const defaultSettings: Settings = {
   replicateApiModelTrigger: "",
   openaiApiKey: "",
   openaiApiModel: "dall-e-3",
+  openaiApiLanguageModel: "gpt-4",
+  groqApiKey: "",
+  groqApiLanguageModel: "mixtral-8x7b-32768",
+  hasGeneratedAtLeastOnce: false,
 }

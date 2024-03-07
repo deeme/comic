@@ -77,25 +77,25 @@ export function SettingsDialog() {
       <DialogTrigger asChild>
         <Button className="space-x-1 md:space-x-2">
           <div>
-            <span className="hidden md:inline">Custom models</span>
+            <span className="hidden md:inline">设置</span>
           </div>
         </Button> 
       </DialogTrigger>
       <DialogContent className="w-full sm:max-w-[500px] md:max-w-[700px] overflow-y-auto h-max-[100vh] md:h-max-[80vh]">
         <DialogHeader>
           <DialogDescription className="w-full text-center text-lg font-bold text-stone-800">
-            Custom Models
+            自定义设置
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-1 space-y-1 text-stone-800">
           <p className="text-sm text-zinc-700">
-            Note: most vendors have a warm-up delay when using a custom or rarely used model. Do not hesitate to try again after 5 minutes if that happens.
+            提醒：当启用定制模型或较少用到的模型时，许多服务供应商需要一段时间的预热。如果遇到这种情况，请耐心等待5分钟之后再试。
           </p>
           <p className="text-sm text-zinc-700">
-            Security note: we do not save your API credentials on our server but inside your web browser, using the local storage.
+            安全须知：我们不会在服务器端保留这些配置信息，它们将通过本地存储功能直接保存在您的网页浏览器里。
           </p>
           <Field>
-            <Label>Image rendering provider:</Label>
+            <Label>图片供应商:</Label>
             <Select
               onValueChange={(value: string) => {
                 setRenderingModelVendor(value as RenderingModelVendor)
@@ -105,10 +105,10 @@ export function SettingsDialog() {
                 <SelectValue placeholder="Theme" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SERVER">Use server settings (default)</SelectItem>
-                <SelectItem value="HUGGINGFACE">Custom Hugging Face model (recommended)</SelectItem>
-                <SelectItem value="REPLICATE">Custom Replicate model (will use your own account)</SelectItem>
-                <SelectItem value="OPENAI">DALL·E 3 by OpenAI (partial support, will use your own account)</SelectItem>
+                <SelectItem value="SERVER">使用服务器设置（默认）</SelectItem>
+                <SelectItem value="HUGGINGFACE">使用自定义的 Hugging Face 模型（推荐）</SelectItem>
+                <SelectItem value="REPLICATE">选择自定义 Replicate 模型（将使用您自己的账户）</SelectItem>
+                <SelectItem value="OPENAI">选用 OpenAI 的 DALL·E 3（支持度有限，需要使用您的个人账户）</SelectItem>
               </SelectContent>
             </Select>
           </Field>
@@ -117,7 +117,7 @@ export function SettingsDialog() {
           {
           renderingModelVendor === "SERVER" && <>
             <Field>
-              <Label>Quality over performance ratio (beta, deprecated):</Label>
+              <Label>考虑质量相对于性能的比重:</Label>
               <div className="flex flex-row space-x-2 text-zinc-500">
                 <Switch
                   // checked={renderingUseTurbo}
