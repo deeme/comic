@@ -59,15 +59,10 @@ export const presets: Record<string, Preset> = {
       `Visual Novel`,
       prompt,
       "insanely detailed and intricate",
-      "in a symbolic and meaningful style",
-      "Surrealistic"
+      "in a symbolic and meaningful style"
     ],
     negativePrompt: () => [
-      "Kinemacolor",
-      "Depth of Field",
-      "Cinematic",
-      "Photography",
-      "Panorama"
+      "Cinematic"
     ],
   },
   chinese_manga: {
