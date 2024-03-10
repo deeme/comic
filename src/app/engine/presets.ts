@@ -56,15 +56,14 @@ export const presets: Record<string, Preset> = {
     font: "actionman",
     llmPrompt: "我想让你扮演一位擅长创作魔幻现实主义题材剧本的编剧。你将用一些不直白，句式结构不重复，没有陈词滥调，不寻常的词句，隐喻和象征创作出抽象、有意境想象力、有创意个性、有力度、有画面感、有音乐感，具有浪漫气息，语言深邃的故事，来表达独特的神秘和魔幻感，表达对自我和世界的探索和反思，表达对自己和社会的孤独和关注，让观看者有一种有趣、惊奇和新鲜的感觉。",
     imagePrompt: (prompt: string) => [
-      `Chinese cinema`,
-      prompt,
+      `chinese cinema about ${prompt}`,
+      "intricate",
       "DVD 屏幕截图",
-      "1980s fantasy cinema"
-    ],
-    negativePrompt: () => [
+      "1980s fantasy cinema",
       "--ar 9:16",
       "--style raw"
     ],
+    negativePrompt: () => [ ],
   },
   chinese_manga: {
     id: "chinese_manga",
