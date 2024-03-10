@@ -427,7 +427,7 @@ export const allLayoutAspectRatios = {
 
 export type LayoutName = keyof typeof allLayouts 
 
-export const defaultLayout: LayoutName = "Layout1"
+export const defaultLayout: LayoutName = "Layout0"
 
 export type LayoutCategory = "square" | "fluid"
 
