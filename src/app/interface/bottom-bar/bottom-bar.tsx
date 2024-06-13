@@ -184,7 +184,7 @@ function BottomBar() {
             onClick={downloadClap}
             disabled={remainingImages > 0}
           >
-          {remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`}
+          {remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `Save`}
         </Button> : null}
      
           <Button
@@ -192,7 +192,7 @@ function BottomBar() {
             disabled={!prompt?.length}
           >
             <span className="hidden md:inline">{
-            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `得到 PDF`
+            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `Get PDF`
             }</span>
             <span className="inline md:hidden">{
               remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `PDF`
