@@ -3,8 +3,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'AI 漫画工厂',
-  description: '使用 LLM + SDXL 生成漫画',
+  title: 'AI Comic Factory: generate your own comics! Powered by Hugging Face 🤗',
+  description: 'Generate comic panels using a LLM + SDXL. Powered by Hugging Face 🤗',
 }
 
 export default function RootLayout({

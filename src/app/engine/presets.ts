@@ -48,76 +48,6 @@ export const presets: Record<string, Preset> = {
     ],
     negativePrompt: () => [ ],
   },
-  chinese: {
-    id: "chinese",
-    label: "奇幻",
-    family: "asian",
-    color: "color",
-    font: "actionman",
-    llmPrompt: "我想让你扮演一位擅长创作魔幻现实主义题材的编剧。你将用一些不直白，句式结构不重复，没有陈词滥调，不寻常的词句，隐喻和象征创作出抽象、有意境想象力、有创意个性、有力度、有画面感、有音乐感，具有浪漫气息，语言深邃的故事，来表达独特的神秘和魔幻感，表达对自我和世界的探索和反思，表达对自己和社会的孤独和关注，让人感到有趣、惊奇和新鲜。保持中文输出",
-    imagePrompt: (prompt: string) => [
-      `中国电影`,
-      `cinematic`,
-      `footage`,
-      `sharp 8k`,
-      `instagram`,
-      `${prompt}`,
-       `crisp details`
-    ],
-    negativePrompt: () => [
-      "中国电影",
-      "DVD 屏幕截图",
-      "1980s fantasy cinema",
-      "--style raw"
-    ],
-  },
-  chinese1: {
-    id: "chinese1",
-    label: "国影",
-    family: "asian",
-    color: "color",
-    font: "actionman",
-    llmPrompt: "中国故事。保持中文输出",
-    imagePrompt: (prompt: string) => [
-      `中国电影`,
-      `cinematic`,
-      `footage`,
-      `sharp 8k`,
-      `instagram`,
-      `${prompt}`,
-       `crisp details`
-    ],
-    negativePrompt: () => [
-      "中国电影",
-      "DVD 屏幕截图",
-      "--style raw"
-    ],
-  },
-  chinese_manga: {
-    id: "chinese_manga",
-    label: "国漫",
-    family: "asian",
-    color: "color",
-    font: "actionman",
-    llmPrompt: "中国漫画。保持中文输出",
-    imagePrompt: (prompt: string) => [
-      `当代中国漫画`,
-      `digital color comicbook style`,
-      prompt,
-      "detailed drawing"
-    ],
-    negativePrompt: () => [
-      "中国漫画",
-      "manga",
-      "anime",
-      "action",
-      "grayscale",
-      "monochrome",
-      "photo",
-      "painting",
-      "3D render"
-    ],
-  },
   /*
   video_3d_style: {
     id: "video_3d_style",
@@ -737,7 +667,7 @@ export const presets: Record<string, Preset> = {
 
 export type PresetName = keyof typeof presets
 
-export const defaultPreset: PresetName = "chinese_manga"
+export const defaultPreset: PresetName = "american_comic_50"
 
 export const nonRandomPresets = Object.keys(presets).filter(p => p !== "random")
 

@@ -416,10 +416,10 @@ export const allLayouts = {
 
 export const allLayoutLabels = {
   random: "Random layout",
-  Layout0: "布局0",
-  Layout1: "布局1",
-  Layout2: "布局2",
-  Layout3: "布局3",
+  Layout0: "Grid 0",
+  Layout1: "Grid 1",
+  Layout2: "Grid 2",
+  Layout3: "Grid 3",
   // Layout4: "Blocks 1",
 }
 
@@ -434,7 +434,7 @@ export const allLayoutAspectRatios = {
 
 export type LayoutName = keyof typeof allLayouts 
 
-export const defaultLayout: LayoutName = "Layout0"
+export const defaultLayout: LayoutName = "Layout1"
 
 export type LayoutCategory = "square" | "fluid"
 

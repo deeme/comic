@@ -25,7 +25,7 @@ const serverReplicateApiModelTrigger = `${process.env.RENDERING_REPLICATE_API_MO
 const videochainToken = `${process.env.AUTH_VIDEOCHAIN_API_TOKEN || ""}`
 const videochainApiUrl = `${process.env.RENDERING_VIDEOCHAIN_API_URL || ""}`
 
-const serverOpenaiApiKey = `${process.env.RENDERING_OPENAI_API_KEY || ""}`
+const serverOpenaiApiKey = `${process.env.AUTH_OPENAI_API_KEY || ""}`
 const serverOpenaiApiBaseUrl = `${process.env.RENDERING_OPENAI_API_BASE_URL || "https://api.openai.com/v1"}`
 const serverOpenaiApiModel = `${process.env.RENDERING_OPENAI_API_MODEL || "dall-e-3"}`
 

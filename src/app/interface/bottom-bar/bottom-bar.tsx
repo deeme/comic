@@ -131,7 +131,7 @@ function BottomBar() {
         `space-x-3`,
         `scale-[0.9]`
       )}>
-        /*去关于*/
+        <About />
         <Discord />
         <Advert />
       </div>
@@ -143,7 +143,7 @@ function BottomBar() {
       `space-x-3`,
       `scale-[0.9]`
     )}>
-      /*去设置*/
+      <SettingsDialog />
       {/*<Button
         onClick={handleUpscale}
         disabled={!prompt?.length || remainingImages > 0 || isUpscaling || !Object.values(upscaleQueue).length}
@@ -199,7 +199,7 @@ function BottomBar() {
             }</span>
         </Button>
   
-       /*去分享*/
+       <Share />
       </div>
     </div>
   )
