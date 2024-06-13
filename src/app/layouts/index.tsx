@@ -416,10 +416,10 @@ export const allLayouts = {
 
 export const allLayoutLabels = {
   random: "Random layout",
-  Layout0: "布局0",
-  Layout1: "布局1",
-  Layout2: "布局2",
-  Layout3: "布局3",
+  Layout0: "甯冨眬0",
+  Layout1: "甯冨眬1",
+  Layout2: "甯冨眬2",
+  Layout3: "甯冨眬3",
   // Layout4: "Blocks 1",
 }
 
