@@ -166,8 +166,8 @@ export function TopMenu() {
           onCheckedChange={setShowCaptions}
         />
         <Label className="text-gray-200 dark:text-gray-200">
-          <span className="hidden md:inline">Caption</span>
-          <span className="inline md:hidden">Cap.</span>
+          <span className="hidden md:inline">字幕</span>
+          <span className="inline md:hidden">字幕</span>
         </Label>
         </div>
         {/*
@@ -206,7 +206,7 @@ export function TopMenu() {
           <div className="flex flex-row flex-grow w-full">
             <Input
               id="top-menu-input-story-prompt"
-              placeholder="1. Story (eg. detective dog)"
+              placeholder="1.故事(eg.'侦探狗')"
               className={cn(
                 `w-1/2 rounded-r-none`,
                 `bg-gray-100 text-gray-700 dark:bg-gray-100 dark:text-gray-700`,
@@ -225,7 +225,7 @@ export function TopMenu() {
             />
             <Input
               id="top-menu-input-style-prompt"
-              placeholder="2. Style (eg 'rain, shiba')"
+              placeholder="2.风格(eg.'雨,柴犬')"
               className={cn(
                 `w-1/2`,
                 `bg-gray-100 text-gray-700 dark:bg-gray-100 dark:text-gray-700`,

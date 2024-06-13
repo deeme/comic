@@ -131,9 +131,9 @@ function BottomBar() {
         `space-x-3`,
         `scale-[0.9]`
       )}>
-        <About />
-        <Discord />
-        <Advert />
+        /*去关于*/
+        /*去论坛*/
+        /*去视频*/
       </div>
       <div className={cn(
       `flex flex-row`,
@@ -143,7 +143,7 @@ function BottomBar() {
       `space-x-3`,
       `scale-[0.9]`
     )}>
-      <SettingsDialog />
+      /*去设置*/
       {/*<Button
         onClick={handleUpscale}
         disabled={!prompt?.length || remainingImages > 0 || isUpscaling || !Object.values(upscaleQueue).length}
@@ -159,7 +159,7 @@ function BottomBar() {
             onClick={handlePrint}
             disabled={!prompt?.length}
           >
-            Print
+            打印
           </Button>
         </div>
         <div>
@@ -168,10 +168,10 @@ function BottomBar() {
             disabled={!prompt?.length}
           >
             <span className="hidden md:inline">{
-            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `Save`
+            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `保存`
             }</span>
             <span className="inline md:hidden">{
-              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `Save`
+              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`
             }</span>
            </Button>
         </div>
@@ -179,12 +179,12 @@ function BottomBar() {
           {canSeeBetaFeatures ? <Button
             onClick={openFilePicker}
             disabled={remainingImages > 0}
-          >Load</Button> : null}
+          >加载</Button> : null}
           {canSeeBetaFeatures ? <Button
             onClick={downloadClap}
             disabled={remainingImages > 0}
           >
-          {remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `Save`}
+          {remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`}
         </Button> : null}
      
           <Button
@@ -192,14 +192,14 @@ function BottomBar() {
             disabled={!prompt?.length}
           >
             <span className="hidden md:inline">{
-            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `Get PDF`
+            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `得到 PDF`
             }</span>
             <span className="inline md:hidden">{
               remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `PDF`
             }</span>
         </Button>
   
-       <Share />
+       /*去分享*/
       </div>
     </div>
   )
