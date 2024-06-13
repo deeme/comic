@@ -131,9 +131,7 @@ function BottomBar() {
         `space-x-3`,
         `scale-[0.9]`
       )}>
-        /*去关于*/
-        /*去论坛*/
-        /*去视频*/
+
       </div>
       <div className={cn(
       `flex flex-row`,
@@ -143,7 +141,7 @@ function BottomBar() {
       `space-x-3`,
       `scale-[0.9]`
     )}>
-      /*去设置*/
+
       {/*<Button
         onClick={handleUpscale}
         disabled={!prompt?.length || remainingImages > 0 || isUpscaling || !Object.values(upscaleQueue).length}
@@ -199,7 +197,7 @@ function BottomBar() {
             }</span>
         </Button>
   
-       /*去分享*/
+
       </div>
     </div>
   )
