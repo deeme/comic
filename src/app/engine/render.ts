@@ -187,7 +187,7 @@ export async function newRender({
         segments: []
       } as RenderedScene
     } else if (renderingEngine === "REPLICATE") {
-      if (!replicateApiKey) {
+      if (!replicateApiKey || `${replicateApiKey || ""}`.length < 8) {
         throw new Error(`invalid replicateApiKey, you need to configure your REPLICATE_API_TOKEN in order to use the REPLICATE rendering engine`)
       }
       if (!replicateApiModel) {
@@ -370,6 +370,9 @@ export async function newRender({
         body: JSON.stringify({
           prompt,
           // negativePrompt, unused for now
+
+          // for a future version of the comic factory
+          identityImage: "",
 
           nbFrames,
 

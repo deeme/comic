@@ -63,7 +63,7 @@ export default function Main() {
   )
   
   const numberOfPanels = Object.keys(panels).length
-  const panelGenerationStatus = useStore(state => state.panelGenerationStatus)
+  const panelGenerationStatus = useStore(s => s.panelGenerationStatus)
   const allStatus = Object.values(panelGenerationStatus)
   const numberOfPendingGenerations = allStatus.reduce((acc, s) => (acc + (s ? 1 : 0)), 0)
 
@@ -120,6 +120,16 @@ export default function Main() {
   useEffect(() => {
     // console.log(`main.tsx: asked to re-generate!!`)
     if (!prompt) { return }
+
+
+    // a quick and dirty hack to skip prompt regeneration,
+    // unless the prompt has really changed
+    if (
+      prompt === useStore.getState().currentClap?.meta.description
+    ) {
+      console.log(`loading a pre-generated comic, so skipping prompt regeneration..`)
+      return
+    }
 
     // if the prompt or preset changed, we clear the cache
     // this part is important, otherwise when trying to change the prompt
@@ -222,14 +232,17 @@ export default function Main() {
           // update the frontend
           // console.log("updating the frontend..")
           setCaptions(ref.current.newCaptions)
-          setPanels(ref.current.newPanelsPrompts)    
-
+          setPanels(ref.current.newPanelsPrompts)
           setGeneratingStory(false)
+
+          // TODO generate the clap here
+          
         } catch (err) {
           console.log("main.tsx: LLM generation failed:", err)
           setGeneratingStory(false)
           break
         }
+
         if (currentPanel > (currentNbPanels / 2)) {
           console.log("main.tsx: we are halfway there, hold tight!")
           // setWaitABitMore(true)

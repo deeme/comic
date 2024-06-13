@@ -8,8 +8,8 @@ import { Login } from "../login"
 const APP_NAME = `AI Comic Factory`
 const APP_DOMAIN = `aicomicfactory.app`
 const APP_URL = `https://aicomicfactory.app`
-const APP_VERSION = `1.3`
-const APP_RELEASE_DATE = `April 2024`
+const APP_VERSION = `1.4`
+const APP_RELEASE_DATE = `May 2024`
 
 const ExternalLink = ({ url, children }: { url: string; children: ReactNode }) => {
   return (
@@ -27,8 +27,8 @@ export function About() {
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <span className="hidden md:inline">{APP_NAME.replaceAll(" ", "-")} {APP_VERSION}</span>
-          <span className="inline md:hidden">Version {APP_VERSION}</span>
+          <span className="hidden md:inline">About</span>
+          <span className="inline md:hidden">About</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="w-full sm:max-w-[500px] md:max-w-[600px] overflow-y-scroll h-[100vh] sm:h-[550px]">

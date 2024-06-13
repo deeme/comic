@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useState } from "react"
+import { useFilePicker } from 'use-file-picker'
 
 import { useStore } from "@/app/store"
 import { Button } from "@/components/ui/button"
@@ -8,31 +9,42 @@ import { sleep } from "@/lib/sleep"
 
 import { Share } from "../share"
 import { About } from "../about"
+import { Discord } from "../discord"
 import { SettingsDialog } from "../settings-dialog"
 import { useLocalStorage } from "usehooks-ts"
 import { localStorageKeys } from "../settings-dialog/localStorageKeys"
 import { defaultSettings } from "../settings-dialog/defaultSettings"
+import { getParam } from "@/lib/getParam"
+import { Advert } from "../advert"
+
 
 function BottomBar() {
   // deprecated, as HTML-to-bitmap didn't work that well for us
-  // const page = useStore(state => state.page)
-  // const download = useStore(state => state.download)
-  // const pageToImage = useStore(state => state.pageToImage)
+  // const page = useStore(s => s.page)
+  // const download = useStore(s => s.download)
+  // const pageToImage = useStore(s => s.pageToImage)
 
-  const isGeneratingStory = useStore(state => state.isGeneratingStory)
-  const prompt = useStore(state => state.prompt)
-  const panelGenerationStatus = useStore(state => state.panelGenerationStatus)
+  const isGeneratingStory = useStore(s => s.isGeneratingStory)
+  const prompt = useStore(s => s.prompt)
+  const panelGenerationStatus = useStore(s => s.panelGenerationStatus)
 
-  const preset = useStore(state => state.preset)
+  const preset = useStore(s => s.preset)
+  
+  const canSeeBetaFeatures = true // getParam<boolean>("beta", false)
 
   const allStatus = Object.values(panelGenerationStatus)
   const remainingImages = allStatus.reduce((acc, s) => (acc + (s ? 1 : 0)), 0)
 
-  const upscaleQueue = useStore(state => state.upscaleQueue)
-  const renderedScenes = useStore(state => state.renderedScenes)
-  const removeFromUpscaleQueue = useStore(state => state.removeFromUpscaleQueue)
-  const setRendered = useStore(state => state.setRendered)
+  const currentClap = useStore(s => s.currentClap)
+  
+  const upscaleQueue = useStore(s => s.upscaleQueue)
+  const renderedScenes = useStore(s => s.renderedScenes)
+  const removeFromUpscaleQueue = useStore(s => s.removeFromUpscaleQueue)
+  const setRendered = useStore(s => s.setRendered)
   const [isUpscaling, setUpscaling] = useState(false)
+
+  const loadClap = useStore(s => s.loadClap)
+  const downloadClap = useStore(s => s.downloadClap)
 
   const [hasGeneratedAtLeastOnce, setHasGeneratedAtLeastOnce] = useLocalStorage<boolean>(
     localStorageKeys.hasGeneratedAtLeastOnce,
@@ -81,6 +93,27 @@ function BottomBar() {
     }
   }, [hasFinishedGeneratingImages, hasGeneratedAtLeastOnce])
 
+  const { openFilePicker, filesContent } = useFilePicker({
+    accept: '.clap',
+    readAs: "ArrayBuffer"
+  })
+  const fileData = filesContent[0]
+
+  useEffect(() => {
+    const fn = async () => {
+      if (fileData?.name) {
+        try {
+          const blob = new Blob([fileData.content])
+          await loadClap(blob)
+        } catch (err) {
+          console.error("failed to load the Clap file:", err)
+        }
+      }
+    }
+    fn()
+  }, [fileData?.name])
+
+
   return (
     <div className={cn(
       `print:hidden`,
@@ -98,11 +131,9 @@ function BottomBar() {
         `space-x-3`,
         `scale-[0.9]`
       )}>
-
-       {/* 
-       Thank you clip factory for your service 🫡
-       <AIClipFactory />
-       */}
+        /*去关于*/
+        <Discord />
+        <Advert />
       </div>
       <div className={cn(
       `flex flex-row`,
@@ -112,7 +143,7 @@ function BottomBar() {
       `space-x-3`,
       `scale-[0.9]`
     )}>
-
+      /*去设置*/
       {/*<Button
         onClick={handleUpscale}
         disabled={!prompt?.length || remainingImages > 0 || isUpscaling || !Object.values(upscaleQueue).length}
@@ -145,18 +176,30 @@ function BottomBar() {
            </Button>
         </div>
           */}
+          {canSeeBetaFeatures ? <Button
+            onClick={openFilePicker}
+            disabled={remainingImages > 0}
+          >Load</Button> : null}
+          {canSeeBetaFeatures ? <Button
+            onClick={downloadClap}
+            disabled={remainingImages > 0}
+          >
+          {remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`}
+        </Button> : null}
+     
           <Button
             onClick={handlePrint}
             disabled={!prompt?.length}
           >
             <span className="hidden md:inline">{
-            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `保存 PDF`
+            remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} panels ⌛` : `得到 PDF`
             }</span>
             <span className="inline md:hidden">{
-              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `保存`
+              remainingImages ? `${allStatus.length - remainingImages}/${allStatus.length} ⌛` : `PDF`
             }</span>
         </Button>
-
+  
+       /*去分享*/
       </div>
     </div>
   )

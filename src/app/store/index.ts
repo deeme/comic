@@ -1,18 +1,23 @@
 "use client"
 
 import { create } from "zustand"
-import html2canvas from "html2canvas"
+import { ClapProject, ClapMediaOrientation, ClapSegment, ClapSegmentCategory, ClapSegmentStatus, ClapOutputType, ClapSegmentFilteringMode, filterSegments, newClap, newSegment, parseClap, serializeClap } from "@aitube/clap"
 
 import { FontName } from "@/lib/fonts"
 import { Preset, PresetName, defaultPreset, getPreset, getRandomPreset } from "@/app/engine/presets"
 import { RenderedScene } from "@/types"
-import { LayoutName, defaultLayout, getRandomLayoutName } from "../layouts"
 import { getParam } from "@/lib/getParam"
+
+import { LayoutName, defaultLayout, getRandomLayoutName } from "../layouts"
+import { putTextInInput } from "@/lib/putTextInInput"
+import { parsePresetFromPrompts } from "@/lib/parsePresetFromPrompts"
+import { parseLayoutFromStoryboards } from "@/lib/parseLayoutFromStoryboards"
 
 export const useStore = create<{
   prompt: string
   font: FontName
   preset: Preset
+  currentClap?: ClapProject
   currentNbPanelsPerPage: number
   maxNbPanelsPerPage: number
   currentNbPages: number
@@ -51,7 +56,7 @@ export const useStore = create<{
   setPanels: (panels: string[]) => void
   setPanelPrompt: (newPrompt: string, index: number) => void
   setShowCaptions: (showCaptions: boolean) => void
-  setLayout: (layout: LayoutName) => void
+  setLayout: (layout: LayoutName, index?: number) => void
   setLayouts: (layouts: LayoutName[]) => void
   setCaptions: (captions: string[]) => void
   setPanelCaption: (newCaption: string, index: number) => void
@@ -70,6 +75,20 @@ export const useStore = create<{
   // setPage: (page: HTMLDivElement) => void
 
   generate: (prompt: string, presetName: PresetName, layoutName: LayoutName) => void
+  convertComicToClap: () => Promise<ClapProject>
+  convertClapToComic: (clap: ClapProject) => Promise<{
+    currentNbPanels: number
+    prompt: string
+    preset: Preset
+    layout: LayoutName
+    storyPrompt: string
+    stylePrompt: string
+    panels: string[]
+    renderedScenes: Record<string, RenderedScene>
+    captions: string[]
+  }>
+  loadClap: (blob: Blob) => Promise<void>
+  downloadClap: () => Promise<void>
 }>((set, get) => ({
   prompt:
     (getParam("stylePrompt", "") || getParam("storyPrompt", ""))
@@ -78,6 +97,7 @@ export const useStore = create<{
   font: "actionman",
   preset: getPreset(getParam("preset", defaultPreset)),
 
+  currentClap: undefined,
   currentNbPanelsPerPage: 4,
   maxNbPanelsPerPage: 4,
   currentNbPages: 1,
@@ -282,15 +302,19 @@ export const useStore = create<{
       ))
     })
   },
-  setLayout: (layoutName: LayoutName) => {
-    const { maxNbPages, currentNbPanelsPerPage } = get()
+  setLayout: (layoutName: LayoutName, index?: number) => {
+    const { maxNbPages, currentNbPanelsPerPage, layouts } = get()
 
-    const layouts: LayoutName[] = []
     for (let i = 0; i < maxNbPages; i++) {
-      layouts.push(
-        layoutName === "random"
-          ? getRandomLayoutName()
-          : layoutName)
+      let name = layoutName === "random" ? getRandomLayoutName() : layoutName
+
+      if (typeof index === "number" && !isNaN(index) && isFinite(index)) {
+        if (i === index) {
+          layouts[i] = name
+        }
+      } else {
+        layouts[i] = name
+      }
     }
 
     set({
@@ -399,5 +423,252 @@ export const useStore = create<{
       layout: layouts[0],
       layouts,
     })
-  }
+  },
+  
+  convertComicToClap: async (): Promise<ClapProject> => {
+    const {
+      currentNbPanels,
+      prompt,
+      panels,
+      renderedScenes,
+      captions
+    } = get()
+
+    const defaultSegmentDurationInMs = 7000
+
+    let currentElapsedTimeInMs = 0
+
+
+    const clap: ClapProject = newClap({
+      meta: {
+        title: "Untitled", // we don't need a title actually
+        description: prompt,
+        prompt: prompt,
+        synopsis: "",
+        licence: "",
+        orientation: ClapMediaOrientation.LANDSCAPE,
+        width: 512,
+        height: 288,
+        isInteractive: false,
+        isLoop: false,
+        durationInMs: panels.length * defaultSegmentDurationInMs,
+        defaultVideoModel: "SDXL",
+      }
+    })
+
+    for (let i = 0; i < panels.length; i++) {
+
+      const panel = panels[i]
+
+      const caption = captions[i]
+
+      const renderedScene = renderedScenes[`${i}`]
+
+      clap.segments.push(newSegment({
+        track: 1,
+        startTimeInMs: currentElapsedTimeInMs,
+        assetDurationInMs: defaultSegmentDurationInMs,
+        category: ClapSegmentCategory.STORYBOARD,
+        prompt: panel,
+        outputType: ClapOutputType.IMAGE,
+        assetUrl: renderedScene?.assetUrl || "",
+        status: ClapSegmentStatus.COMPLETED,
+      }))
+  
+      clap.segments.push(newSegment({
+        track: 2,
+        startTimeInMs: currentElapsedTimeInMs,
+        assetDurationInMs: defaultSegmentDurationInMs,
+        category: ClapSegmentCategory.INTERFACE,
+        prompt: caption,
+        // assetUrl: `data:text/plain;base64,${btoa(title)}`,
+        assetUrl: caption,
+        outputType: ClapOutputType.TEXT,
+        status: ClapSegmentStatus.COMPLETED,
+      }))
+  
+      clap.segments.push(newSegment({
+        track: 3,
+        startTimeInMs: currentElapsedTimeInMs,
+        assetDurationInMs: defaultSegmentDurationInMs,
+        category: ClapSegmentCategory.DIALOGUE,
+        prompt: caption,
+        outputType: ClapOutputType.AUDIO,
+        status: ClapSegmentStatus.TO_GENERATE,
+      }))
+  
+      // the presence of a camera is mandatory
+      clap.segments.push(newSegment({
+        track: 4,
+        startTimeInMs: currentElapsedTimeInMs,
+        assetDurationInMs: defaultSegmentDurationInMs,
+        category: ClapSegmentCategory.CAMERA,
+        prompt: "movie still",
+        outputType: ClapOutputType.TEXT,
+        status: ClapSegmentStatus.COMPLETED,
+      }))
+  
+      currentElapsedTimeInMs += defaultSegmentDurationInMs
+    }
+
+    set({ currentClap: clap })
+
+    return clap
+  },
+
+  convertClapToComic: async (clap: ClapProject): Promise<{
+    currentNbPanels: number
+    prompt: string
+    preset: Preset
+    layout: LayoutName
+    storyPrompt: string
+    stylePrompt: string
+    panels: string[]
+    renderedScenes: Record<string, RenderedScene>
+    captions: string[]
+  }> => {
+
+    const prompt = clap.meta.description
+    const [stylePrompt, storyPrompt] = prompt.split("||").map(x => x.trim())
+
+    const panels: string[] = []
+    const renderedScenes: Record<string, RenderedScene> = {}
+    const captions: string[] = []
+
+    const panelGenerationStatus: Record<number, boolean> = {}
+
+    const cameraShots = clap.segments.filter(s => s.category === ClapSegmentCategory.CAMERA)
+
+    const shots = cameraShots.map(cameraShot => ({
+      camera: cameraShot,
+      storyboard: filterSegments(
+        ClapSegmentFilteringMode.START,
+        cameraShot,
+        clap.segments,
+        ClapSegmentCategory.STORYBOARD,
+      ).at(0) as (ClapSegment | undefined),
+      ui: filterSegments(
+        ClapSegmentFilteringMode.START,
+        cameraShot,
+        clap.segments,
+        ClapSegmentCategory.INTERFACE,
+      ).at(0) as (ClapSegment | undefined)
+    })).filter(item => item.storyboard && item.ui) as {
+      camera: ClapSegment
+      storyboard: ClapSegment
+      ui: ClapSegment
+    }[]
+
+    shots.forEach(({ camera, storyboard, ui }, id) => {
+
+      panels.push(storyboard.prompt)
+
+      const renderedScene: RenderedScene = {
+        renderId: storyboard?.id || "",
+        status: "pending",
+        assetUrl: "", 
+        alt: storyboard?.prompt || "",
+        error: "",
+        maskUrl: "",
+        segments: []
+      }
+
+      if (storyboard?.assetUrl) {
+        renderedScene.assetUrl = storyboard.assetUrl
+        renderedScene.status = "pregenerated" // <- special trick to indicate that it should not be re-generated
+      }
+
+      renderedScenes[id] = renderedScene
+
+      panelGenerationStatus[id] = false
+      
+      captions.push(ui?.prompt || "")
+    })
+
+
+    return {
+      currentNbPanels: shots.length,
+      prompt,
+      preset: parsePresetFromPrompts(panels),
+      layout: await parseLayoutFromStoryboards(shots.map(x => x.storyboard)),
+      storyPrompt,
+      stylePrompt,
+      panels,
+      renderedScenes,
+      captions,
+
+    }
+  },
+
+  loadClap: async (blob: Blob) => {
+    const { convertClapToComic, currentNbPanelsPerPage } = get()
+
+    const currentClap = await parseClap(blob)
+
+    const {
+      currentNbPanels,
+      prompt,
+      preset,
+      layout,
+      storyPrompt,
+      stylePrompt,
+      panels,
+      renderedScenes,
+      captions,
+    } = await convertClapToComic(currentClap)
+
+    // kids, don't do this in your projects: use state managers instead!
+    putTextInInput(document.getElementById("top-menu-input-style-prompt") as HTMLInputElement, stylePrompt)
+    putTextInInput(document.getElementById("top-menu-input-story-prompt") as HTMLInputElement, storyPrompt)
+
+    set({
+      currentClap,
+      currentNbPanels,
+      prompt,
+      preset,
+      // layout,
+      panels,
+      renderedScenes,
+      captions,
+      currentNbPages: Math.round(currentNbPanels / currentNbPanelsPerPage),
+      upscaleQueue: {},
+      isGeneratingStory: false,
+      isGeneratingText: false,
+    })
+  },
+
+  downloadClap: async () => {
+    const { convertComicToClap, prompt } = get()
+
+    const currentClap = await convertComicToClap()
+
+    if (!currentClap) { throw new Error(`cannot save a clap.. if there is no clap`) }
+
+    const currentClapBlob: Blob = await serializeClap(currentClap)
+
+    // Create an object URL for the compressed clap blob
+    const objectUrl = URL.createObjectURL(currentClapBlob)
+  
+    // Create an anchor element and force browser download
+    const anchor = document.createElement("a")
+    anchor.href = objectUrl
+
+    const [stylePrompt, storyPrompt] = prompt.split("||").map(x => x.trim())
+
+    const cleanStylePrompt = (stylePrompt || "").replace(/([^a-z0-9, ]+)/gi, " ")
+
+    const firstPartOfStory = (storyPrompt || "").split(",").shift() || ""
+    const cleanStoryPrompt = firstPartOfStory.replace(/([^a-z0-9, ]+)/gi, " ")
+
+    const cleanName = `${cleanStoryPrompt.slice(0, 90)} (${cleanStylePrompt.slice(0, 90) || "default style"})`
+
+    anchor.download = `${cleanName}.clap`
+
+    document.body.appendChild(anchor) // Append to the body (could be removed once clicked)
+    anchor.click() // Trigger the download
+  
+    // Cleanup: revoke the object URL and remove the anchor element
+    URL.revokeObjectURL(objectUrl)
+    document.body.removeChild(anchor)
+  },
 }))

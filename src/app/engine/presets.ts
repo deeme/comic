@@ -54,7 +54,7 @@ export const presets: Record<string, Preset> = {
     family: "asian",
     color: "color",
     font: "actionman",
-    llmPrompt: "我想让你扮演一位擅长创作魔幻现实主义题材的编剧。你将用一些不直白，句式结构不重复，没有陈词滥调，不寻常的词句，隐喻和象征创作出抽象、有意境想象力、有创意个性、有力度、有画面感、有音乐感，具有浪漫气息，语言深邃的故事，来表达独特的神秘和魔幻感，表达对自我和世界的探索和反思，表达对自己和社会的孤独和关注，让人感到有趣、惊奇和新鲜。",
+    llmPrompt: "我想让你扮演一位擅长创作魔幻现实主义题材的编剧。你将用一些不直白，句式结构不重复，没有陈词滥调，不寻常的词句，隐喻和象征创作出抽象、有意境想象力、有创意个性、有力度、有画面感、有音乐感，具有浪漫气息，语言深邃的故事，来表达独特的神秘和魔幻感，表达对自我和世界的探索和反思，表达对自己和社会的孤独和关注，让人感到有趣、惊奇和新鲜。保持中文输出",
     imagePrompt: (prompt: string) => [
       `中国电影`,
       `cinematic`,
@@ -77,7 +77,7 @@ export const presets: Record<string, Preset> = {
     family: "asian",
     color: "color",
     font: "actionman",
-    llmPrompt: "中国故事",
+    llmPrompt: "中国故事。保持中文输出",
     imagePrompt: (prompt: string) => [
       `中国电影`,
       `cinematic`,
@@ -99,7 +99,7 @@ export const presets: Record<string, Preset> = {
     family: "asian",
     color: "color",
     font: "actionman",
-    llmPrompt: "中国漫画",
+    llmPrompt: "中国漫画。保持中文输出",
     imagePrompt: (prompt: string) => [
       `当代中国漫画`,
       `digital color comicbook style`,
