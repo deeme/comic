@@ -28,7 +28,7 @@ export interface Preset {
 export const presets: Record<string, Preset> = {
   random: {
     id: "random",
-    label: "Random style",
+    label: "随机样式",
     family: "european",
     color: "color",
     font: "actionman",
@@ -38,7 +38,7 @@ export const presets: Record<string, Preset> = {
   },
   neutral: {
     id: "neutral",
-    label: "Neutral (no style)",
+    label: "无特定风格",
     family: "american",
     color: "color",
     font: "actionman",
@@ -56,66 +56,188 @@ export const presets: Record<string, Preset> = {
     font: "actionman",
     llmPrompt: "我想让你扮演一位擅长创作魔幻现实主义题材的编剧。你将用一些不直白，句式结构不重复，没有陈词滥调，不寻常的词句，隐喻和象征创作出抽象、有意境想象力、有创意个性、有力度、有画面感、有音乐感，具有浪漫气息，语言深邃的故事，来表达独特的神秘和魔幻感，表达对自我和世界的探索和反思，表达对自己和社会的孤独和关注，让人感到有趣、惊奇和新鲜。保持中文输出",
     imagePrompt: (prompt: string) => [
-      `中国电影`,
       `cinematic`,
+      `hyperrealistic`,
       `footage`,
       `sharp 8k`,
+      `analog`,
       `instagram`,
+      `photoshoot`,
       `${prompt}`,
-       `crisp details`
+      `crisp details`,
+      `color movie screencap`,
+      `chinese 1980s fantasy cinema`
     ],
     negativePrompt: () => [
-      "中国电影",
-      "DVD 屏幕截图",
-      "1980s fantasy cinema",
-      "--style raw"
+      "manga",
+      "anime",
+      "american comic",
+      "grayscale",
+      "monochrome",
+      "painting"
     ],
   },
-  chinese1: {
-    id: "chinese1",
+  chinese0: {
+    id: "chinese0",
     label: "国影",
     family: "asian",
     color: "color",
     font: "actionman",
-    llmPrompt: "中国故事。保持中文输出",
+    llmPrompt: "保持中文输出",
     imagePrompt: (prompt: string) => [
-      `中国电影`,
       `cinematic`,
+      `hyperrealistic`,
       `footage`,
       `sharp 8k`,
+      `analog`,
       `instagram`,
+      `photoshoot`,
       `${prompt}`,
-       `crisp details`
+      `crisp details`,
+      `color movie screencap`,
+      `chinese movie`
     ],
     negativePrompt: () => [
-      "中国电影",
-      "DVD 屏幕截图",
-      "--style raw"
+      "manga",
+      "anime",
+      "american comic",
+      "grayscale",
+      "monochrome",
+      "painting"
     ],
   },
   chinese_manga: {
     id: "chinese_manga",
-    label: "国漫",
+    label: "中式现代",
     family: "asian",
     color: "color",
     font: "actionman",
-    llmPrompt: "中国漫画。保持中文输出",
+    llmPrompt: "保持中文输出",
     imagePrompt: (prompt: string) => [
-      `当代中国漫画`,
-      `digital color comicbook style`,
+      "digital color comicbook style",
+      `modern chinese comic`,
       prompt,
       "detailed drawing"
     ],
     negativePrompt: () => [
-      "中国漫画",
-      "manga",
-      "anime",
-      "action",
-      "grayscale",
-      "monochrome",
+      "franco-belgian comic",
+      "color album",
+      "color",
+      "american comic",
       "photo",
       "painting",
-      "3D render"
+      "3D render",
+      "manga",
+      "anime",
+      "grayscale",
+      "monochrome",
+      "action"
+    ],
+  },
+  chinese1: {
+    id: "chinese1",
+    label: "中式经典动画",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "保持中文输出",
+    imagePrompt: (prompt: string) => [
+      `The distinctive animation style of the Shanghai Animation Film Studio, renowned for its integration of traditional Chinese artistry and modern animation techniques, producing visually rich and culturally resonant works.上海美术电影制片厂动画风格`,
+      prompt,
+      "detailed drawing"
+    ],
+    negativePrompt: () => [
+      "franco-belgian comic",
+      "color album",
+      "color",
+      "american comic",
+      "photo",
+      "painting",
+      "manga",
+      "anime",
+      "grayscale",
+      "monochrome",
+    ],
+  },
+  chinese2: {
+    id: "chinese2",
+    label: "讽刺幽默漫画",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "保持中文输出",
+    imagePrompt: (prompt: string) => [
+      `The satirical and humorous illustration style epitomized by Feng Zikai, renowned for its subtle societal commentary and whimsical charm, blending pointed wit with delicate artistic execution.丰子恺为代表的讽刺和幽默漫画风格`,
+      prompt,
+      "detailed drawing"
+    ],
+    negativePrompt: () => [
+      "franco-belgian comic",
+      "color album",
+      "color",
+      "american comic",
+      "photo",
+      "painting",
+      "3D render",
+      "manga",
+      "anime",
+      "grayscale",
+      "monochrome",
+      "action"
+    ],
+  },
+  chinese3: {
+    id: "chinese3",
+    label: "连环画",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "保持中文输出",
+    imagePrompt: (prompt: string) => [
+      `The style of Chinese traditional lianhuanhua, a sequential art form characterized by its illustrative and narrative approach, often depicting historical tales and folklore in a vivid and engaging manner.中国传统连环画风格`,
+      prompt,
+      "detailed drawing"
+    ],
+    negativePrompt: () => [
+      "franco-belgian comic",
+      "color album",
+      "color",
+      "american comic",
+      "photo",
+      "painting",
+      "3D render",
+      "manga",
+      "anime",
+      "grayscale",
+      "monochrome",
+      "action"
+    ],
+  },
+  chinese4: {
+    id: "chinese4",
+    label: "水墨画",
+    family: "asian",
+    color: "color",
+    font: "actionman",
+    llmPrompt: "保持中文输出",
+    imagePrompt: (prompt: string) => [
+      `The style of Chinese traditional ink wash painting, characterized by its flowing lines and monochromatic tonality, reflecting the essence of Chinese artistic expression.中国传统水墨画风格`,
+      prompt,
+      "detailed drawing"
+    ],
+    negativePrompt: () => [
+      "franco-belgian comic",
+      "color album",
+      "color",
+      "american comic",
+      "photo",
+      "painting",
+      "3D render",
+      "manga",
+      "anime",
+      "grayscale",
+      "monochrome",
+      "action"
     ],
   },
   /*
@@ -134,7 +256,7 @@ export const presets: Record<string, Preset> = {
   */
   japanese_manga: {
     id: "japanese_manga",
-    label: "Japanese",
+    label: "日式",
     family: "asian",
     color: "grayscale",
     font: "actionman",
@@ -163,7 +285,7 @@ export const presets: Record<string, Preset> = {
   },
   nihonga: {
     id: "nihonga",
-    label: "Nihonga",
+    label: "Nihonga（日本画）",
     family: "asian",
     color: "color",
     font: "actionman",
@@ -191,7 +313,7 @@ export const presets: Record<string, Preset> = {
   },
   franco_belgian: {
     id: "franco_belgian",
-    label: "Franco-Belgian",
+    label: "法比风格",
     family: "european",
     color: "color",
     font: "actionman",
@@ -217,7 +339,7 @@ export const presets: Record<string, Preset> = {
   },
   american_comic_90: {
     id: "american_comic_90",
-    label: "American (modern)",
+    label: "美式现代",
     family: "american",
     color: "color",
     font: "actionman",
@@ -248,7 +370,7 @@ export const presets: Record<string, Preset> = {
 
   /*
   american_comic_40: {
-    label: "American (1940)",
+    label: "美式 (1940)",
     family: "american",
     color: "color",
     font: "actionman",
@@ -279,7 +401,7 @@ export const presets: Record<string, Preset> = {
   */
   american_comic_50: {
     id: "american_comic_50",
-    label: "American (1950)",
+    label: "美式 (1950)",
     family: "american",
     color: "color",
     font: "actionman",
@@ -309,7 +431,7 @@ export const presets: Record<string, Preset> = {
   },
   /*
   american_comic_60: {
-    label: "American (1960)",
+    label: "美式 (1960)",
     family: "american",
     color: "color",
     font: "actionman",
@@ -342,7 +464,7 @@ export const presets: Record<string, Preset> = {
   
   flying_saucer: {
     id: "flying_saucer",
-    label: "Flying saucer",
+    label: "复古科幻",
     family: "european",
     color: "color",
     font: "actionman",
@@ -371,7 +493,7 @@ export const presets: Record<string, Preset> = {
  
   humanoid: {
     id: "humanoid",
-    label: "Humanoid",
+    label: "欧式Moebius",
     family: "european",
     color: "color",
     font: "actionman",
@@ -400,7 +522,7 @@ export const presets: Record<string, Preset> = {
   },
   haddock: {
     id: "haddock",
-    label: "Haddock",
+    label: "欧式Haddock",
     family: "european",
     color: "color",
     font: "actionman",
@@ -455,7 +577,7 @@ export const presets: Record<string, Preset> = {
   */
   armorican: {
     id: "armorican",
-    label: "Armorican",
+    label: "欧式Armorican",
     family: "european",
     color: "monochrome",
     font: "actionman",
@@ -486,7 +608,7 @@ export const presets: Record<string, Preset> = {
   },
   render: {
     id: "render",
-    label: "3D Render",
+    label: "3D卡通",
     family: "european",
     color: "color",
     font: "actionman",
@@ -512,7 +634,7 @@ export const presets: Record<string, Preset> = {
   },
   klimt: {
     id: "klimt",
-    label: "Klimt",
+    label: "欧式Klimt",
     family: "european",
     color: "color",
     font: "actionman",
@@ -537,7 +659,7 @@ export const presets: Record<string, Preset> = {
   },
   medieval: {
     id: "medieval",
-    label: "Medieval",
+    label: "欧洲中世纪",
     family: "european",
     color: "color",
     font: "actionman",
@@ -613,7 +735,7 @@ export const presets: Record<string, Preset> = {
   */
   egyptian: {
     id: "egyptian",
-    label: "Egyptian",
+    label: "古埃及",
     family: "european",
     color: "color",
     font: "actionman",
@@ -683,7 +805,7 @@ export const presets: Record<string, Preset> = {
   */
   photonovel: {
     id: "photonovel",
-    label: "Vintage photonovel",
+    label: "法式新浪潮电影",
     family: "european",
     color: "color",
     font: "actionman",
@@ -708,7 +830,7 @@ export const presets: Record<string, Preset> = {
   },
   stockphoto: {
     id: "stockphoto",
-    label: "Stock photo",
+    label: "超现实主义电影",
     family: "european",
     color: "color",
     font: "actionman",
@@ -737,7 +859,7 @@ export const presets: Record<string, Preset> = {
 
 export type PresetName = keyof typeof presets
 
-export const defaultPreset: PresetName = "chinese_manga"
+export const defaultPreset: PresetName = "render"
 
 export const nonRandomPresets = Object.keys(presets).filter(p => p !== "random")
 
