@@ -31,7 +31,7 @@ export const predictNextPanels = async ({
   // return mockGeneratedPanels
 
   const existingPanelsTemplate = existingPanels.length
-    ? ` To help you, here are the previous panels, their speeches and captions (note: if you see an anomaly here eg. no speech, no caption or the same description repeated multiple times, do not hesitate to fix the story): ${JSON.stringify(existingPanels, null, 1)}`
+    ? ` To help you, here are the previous panels, their speeches and captions (note: if you see an anomaly here eg. no speech, no caption or the same description repeated multiple times, do not hesitate to fix the story): ${JSON.stringify(existingPanels, null, 2)}`
     : ''
 
   const firstNextOrLast =
@@ -66,7 +66,7 @@ export const predictNextPanels = async ({
     result = `${await predict({
       systemPrompt,
       userPrompt,
-      nbMaxNewTokens,
+      //nbMaxNewTokens,
       llmVendorConfig
     })}`.trim()
     console.log("LLM result (1st trial):", result)
@@ -82,7 +82,7 @@ export const predictNextPanels = async ({
       result = `${await predict({
         systemPrompt: systemPrompt + " \n ",
         userPrompt,
-        nbMaxNewTokens,
+        //nbMaxNewTokens,
         llmVendorConfig
       })}`.trim()
       console.log("LLM result (2nd trial):", result)
