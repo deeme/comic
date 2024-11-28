@@ -9,6 +9,48 @@ import { predict } from "./predict"
 import { getSystemPrompt } from "./getSystemPrompt"
 import { getUserPrompt } from "./getUserPrompt"
 
+// 定义重试配置
+const RETRY_CONFIG = {
+  MAX_RETRIES: 3,
+  INITIAL_DELAY: 2000,
+  MAX_DELAY: 10000
+}
+
+// 指数退避重试函数
+const retryWithExponentialBackoff = async <T>(
+  fn: () => Promise<T>,
+  retries = RETRY_CONFIG.MAX_RETRIES,
+  delay = RETRY_CONFIG.INITIAL_DELAY
+): Promise<T> => {
+  try {
+    return await fn()
+  } catch (error) {
+    if (retries <= 0) throw error
+    await sleep(delay)
+    return retryWithExponentialBackoff(fn, retries - 1, Math.min(delay * 2, RETRY_CONFIG.MAX_DELAY))
+  }
+}
+
+// 验证输入参数
+const validateInput = ({
+  preset,
+  nbPanelsToGenerate,
+  maxNbPanels,
+  existingPanels,
+}: {
+  preset: Preset
+  nbPanelsToGenerate: number
+  maxNbPanels: number
+  existingPanels: GeneratedPanel[]
+}) => {
+  if (!preset) throw new Error('Preset is required')
+  if (nbPanelsToGenerate <= 0) throw new Error('Number of panels must be positive')
+  if (maxNbPanels < nbPanelsToGenerate) throw new Error('Max panels cannot be less than panels to generate')
+  if (existingPanels.length + nbPanelsToGenerate > maxNbPanels) {
+    throw new Error('Total number of panels would exceed maximum')
+  }
+}
+
 export const predictNextPanels = async ({
   preset,
   prompt = "",
@@ -24,92 +66,76 @@ export const predictNextPanels = async ({
   existingPanels: GeneratedPanel[]
   llmVendorConfig: LLMVendorConfig
 }): Promise<GeneratedPanel[]> => {
-  // console.log("predictNextPanels: ", { prompt, nbPanelsToGenerate })
-  // throw new Error("Planned maintenance")
-  
-  // In case you need to quickly debug the RENDERING engine you can uncomment this:
-  // return mockGeneratedPanels
+  try {
+    // 验证输入
+    validateInput({ preset, nbPanelsToGenerate, maxNbPanels, existingPanels })
 
-  const existingPanelsTemplate = existingPanels.length
-    ? ` To help you, here are the previous panels, their speeches and captions (note: if you see an anomaly here eg. no speech, no caption or the same description repeated multiple times, do not hesitate to fix the story): ${JSON.stringify(existingPanels, null, 2)}`
-    : ''
+    const existingPanelsTemplate = existingPanels.length
+      ? ` To help you, here are the previous panels: ${JSON.stringify(existingPanels, null, 2)}`
+      : ''
 
-  const firstNextOrLast =
-    existingPanels.length === 0
-      ? "first"
-      : (maxNbPanels - existingPanels.length) === maxNbPanels
-      ? "last"
-      : "next"
+    const firstNextOrLast =
+      existingPanels.length === 0
+        ? "first"
+        : (maxNbPanels - existingPanels.length) === maxNbPanels
+        ? "last"
+        : "next"
 
-  const systemPrompt = getSystemPrompt({
-    preset,
-    firstNextOrLast,
-    maxNbPanels,
-    nbPanelsToGenerate,
-  })
+    const systemPrompt = getSystemPrompt({
+      preset,
+      firstNextOrLast,
+      maxNbPanels,
+      nbPanelsToGenerate,
+    })
 
-  const userPrompt = getUserPrompt({
-    prompt,
-    existingPanelsTemplate,
-  })
+    const userPrompt = getUserPrompt({
+      prompt,
+      existingPanelsTemplate,
+    })
 
-  // we don't require a lot of token for our task,
-  // but to be safe, let's count ~200 tokens per panel
-  const nbTokensPerPanel = 200
+    const nbTokensPerPanel = 200
+    const nbMaxNewTokens = nbPanelsToGenerate * nbTokensPerPanel
 
-  const nbMaxNewTokens = nbPanelsToGenerate * nbTokensPerPanel
-
-  let maxRetries = 5;
-  let result = "";
-
-  while (maxRetries > 0) {
-    try {
-      result = `${await predict({
+    // 使用重试机制调用 predict
+    const result = await retryWithExponentialBackoff(async () => {
+      const response = await predict({
         systemPrompt,
         userPrompt,
         nbMaxNewTokens,
         llmVendorConfig
-      })}`.trim();
-      console.log("LLM result (trial #", 4 - maxRetries, "):", result);
-      if (result.length) {
-        break;
+      })
+      
+      if (!response || typeof response !== 'string' || !response.trim()) {
+        throw new Error('Empty or invalid response from LLM')
       }
+      
+      return response.trim()
+    })
+
+    const cleanedJson = cleanJson(result)
+    let generatedPanels: GeneratedPanel[] = []
+
+    try {
+      generatedPanels = dirtyGeneratedPanelsParser(cleanedJson)
     } catch (err) {
-      console.error(`prediction of the story failed, retrying... (${4 - maxRetries} trials left)`);
-      await sleep(2000);
+      // 降级处理
+      generatedPanels = cleanedJson.split("*")
+        .map((item, i) => ({
+          panel: i,
+          caption: item.trim(),
+          speech: item.trim(),
+          instructions: item.trim(),
+        }))
     }
-    maxRetries--;
+
+    // 验证生成的面板数量
+    if (generatedPanels.length !== nbPanelsToGenerate) {
+      throw new Error(`Generated panels count mismatch: expected ${nbPanelsToGenerate}, got ${generatedPanels.length}`)
+    }
+
+    return generatedPanels.map(res => dirtyGeneratedPanelCleaner(res))
+  } catch (error) {
+    console.error('Error in predictNextPanels:', error)
+    throw error
   }
-
-  if (!result.length) {
-    throw new Error("failed to generate the story after multiple trials 💩");
-  }
-
-  // console.log("Raw response from LLM:", result)
-  const tmp = cleanJson(result)
-  
-  let generatedPanels: GeneratedPanel[] = []
-
-  try {
-    generatedPanels = dirtyGeneratedPanelsParser(tmp)
-  } catch (err) {
-    // console.log(`failed to read LLM response: ${err}`)
-    // console.log(`original response was:`, result)
-
-      // in case of failure here, it might be because the LLM hallucinated a completely different response,
-      // such as markdown. There is no real solution.. but we can try a fallback:
-
-    generatedPanels = (
-      tmp.split("*")
-      .map(item => item.trim())
-      .map((cap, i) => ({
-        panel: i,
-        caption: cap,
-        speech: cap,
-        instructions: cap,
-      }))
-    )
-  }
-
-  return generatedPanels.map(res => dirtyGeneratedPanelCleaner(res))
 }
