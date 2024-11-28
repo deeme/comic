@@ -28,10 +28,10 @@ async function makeOpenAICall(
   try {
     const res = await openai.chat.completions.create({
       messages: messages,
-      stream: false,
+      //stream: false,
       model: model,
-      temperature: 0.8,
-      max_tokens: nbMaxNewTokens,
+      //temperature: 0.8,
+      //max_tokens: nbMaxNewTokens,
     })
     return res.choices[0].message.content || ""
   } catch (err) {
