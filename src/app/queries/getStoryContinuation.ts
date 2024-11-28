@@ -25,13 +25,13 @@ export const getStoryContinuation = async ({
   llmVendorConfig: LLMVendorConfig
   timeout?: number
 }): Promise<GeneratedPanel[]> => {
-  // 添加超时控制
+  // 娣诲姞瓒呮椂鎺у埗
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('Operation timed out')), timeout)
   })
 
   try {
-    // 基本验证
+    // 鍩烘湰楠岃瘉
     if (nbPanelsToGenerate <= 0) throw new Error('Invalid number of panels to generate')
     if (maxNbPanels < nbPanelsToGenerate) throw new Error('Invalid max panels number')
 
@@ -40,7 +40,7 @@ export const getStoryContinuation = async ({
 
     const prompt = joinWords([userStoryPrompt])
 
-    // 使用 Promise.race 实现超时控制
+    // 浣跨敤 Promise.race 瀹炵幇瓒呮椂鎺у埗
     const panelCandidates = await Promise.race([
       predictNextPanels({
         preset,
@@ -63,7 +63,7 @@ export const getStoryContinuation = async ({
   } catch (error) {
     console.error('Error in getStoryContinuation:', error)
     
-    // 降级处理
+    // 闄嶇骇澶勭悊
     const degradedPanels: GeneratedPanel[] = []
     const startAt = (existingPanels?.length + 1) || 0
     const endAt = startAt + nbPanelsToGenerate
