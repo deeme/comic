@@ -22,56 +22,71 @@ export const getStoryContinuation = async ({
   llmVendorConfig: LLMVendorConfig
 }): Promise<GeneratedPanel[]> => {
 
-  let panels: GeneratedPanel[] = []
-  const startAt: number = (existingPanels.length + 1) || 0
-  const endAt: number = startAt + nbPanelsToGenerate
+  const MAX_RETRIES = 3; // 最大重试次数
+  let retryCount = 0;
+  
+  const tryGeneratePanels = async (): Promise<GeneratedPanel[]> => {
+    let panels: GeneratedPanel[] = [];
+    const startAt: number = (existingPanels.length + 1) || 0;
+    const endAt: number = startAt + nbPanelsToGenerate;
 
-  try {
+    try {
+      const prompt = joinWords([userStoryPrompt]);
+      
+      const panelCandidates: GeneratedPanel[] = await predictNextPanels({
+        preset,
+        prompt,
+        nbPanelsToGenerate,
+        maxNbPanels,
+        existingPanels,
+        llmVendorConfig,
+      });
 
-    const prompt = joinWords([ userStoryPrompt ])
+      // 检查是否有空caption
+      const hasEmptyCaption = panelCandidates.some(
+        panel => !panel?.caption || panel.caption.trim() === ""
+      );
 
-    const panelCandidates: GeneratedPanel[] = await predictNextPanels({
-      preset,
-      prompt,
-      nbPanelsToGenerate,
-      maxNbPanels,
-      existingPanels,
-      llmVendorConfig,
-    })
+      if (hasEmptyCaption && retryCount < MAX_RETRIES) {
+        retryCount++;
+        console.log(`检测到空caption，第${retryCount}次重试...`);
+        await sleep(2000); // 重试前等待2秒
+        return tryGeneratePanels();
+      }
 
-    // console.log("LLM responded with panelCandidates:", panelCandidates)
+      // 处理panel数据
+      for (let i = 0; i < nbPanelsToGenerate; i++) {
+        panels.push({
+          panel: startAt + i,
+          instructions: `${panelCandidates[i]?.instructions || ""}`,
+          speech: `${panelCandidates[i]?.speech || ""}`,
+          caption: `${panelCandidates[i]?.caption || ""}`,
+        });
+      }
 
-    // we clean the output from the LLM
-    // most importantly, we need to adjust the panel index,
-    // to start from where we last finished
-    for (let i = 0; i < nbPanelsToGenerate; i++) {
-      panels.push({
-        panel: startAt + i,
-        instructions: `${panelCandidates[i]?.instructions || ""}`,
-        speech: `${panelCandidates[i]?.speech || ""}`,
-        caption: `${panelCandidates[i]?.caption || ""}`,
-      })
+      return panels;
+      
+    } catch (err) {
+      // 降级处理
+      console.error("生成失败，使用降级模式:", err);
+      panels = [];
+      for (let p = startAt; p < endAt && p; p++) {
+        panels.push({
+          panel: p,
+          instructions: joinWords([
+            stylePrompt,
+            userStoryPrompt,
+            `${".".repeat(p)}`,
+          ]),
+          speech: "...",
+          caption: "(Sorry, LLM generation failed: using degraded mode)"
+        });
+      }
+      await sleep(2000);
+      return panels;
     }
-    
-  } catch (err) {
-    // console.log("LLM step failed due to:", err)
-    // console.log("we are now switching to a degraded mode, using 4 similar panels")
-    panels = []
-    for (let p = startAt; p < endAt && p; p++) {
-      panels.push({
-        panel: p,
-        instructions: joinWords([
-          stylePrompt,
-          userStoryPrompt,
-          `${".".repeat(p)}`,
-        ]),
-        speech: "...",
-        caption: "(Sorry, LLM generation failed: using degraded mode)"
-      })
-    }
-    await sleep(2000)
-    // console.error(err)
-  } finally {
-    return panels
-  }
+  };
+
+  // 开始生成过程
+  return await tryGeneratePanels();
 }
