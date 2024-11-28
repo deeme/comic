@@ -4,52 +4,8 @@ import { dirtyGeneratedPanelCleaner } from "@/lib/dirtyGeneratedPanelCleaner"
 import { dirtyGeneratedPanelsParser } from "@/lib/dirtyGeneratedPanelsParser"
 import { sleep } from "@/lib/sleep"
 
-import { Preset } from "../engine/presets"
-import { predict } from "./predict"
-import { getSystemPrompt } from "./getSystemPrompt"
-import { getUserPrompt } from "./getUserPrompt"
-
-// 定义重试配置
-const RETRY_CONFIG = {
-  MAX_RETRIES: 3,
-  INITIAL_DELAY: 2000,
-  MAX_DELAY: 10000
-}
-
-// 指数退避重试函数
-const retryWithExponentialBackoff = async <T>(
-  fn: () => Promise<T>,
-  retries = RETRY_CONFIG.MAX_RETRIES,
-  delay = RETRY_CONFIG.INITIAL_DELAY
-): Promise<T> => {
-  try {
-    return await fn()
-  } catch (error) {
-    if (retries <= 0) throw error
-    await sleep(delay)
-    return retryWithExponentialBackoff(fn, retries - 1, Math.min(delay * 2, RETRY_CONFIG.MAX_DELAY))
-  }
-}
-
-// 验证输入参数
-const validateInput = ({
-  preset,
-  nbPanelsToGenerate,
-  maxNbPanels,
-  existingPanels,
-}: {
-  preset: Preset
-  nbPanelsToGenerate: number
-  maxNbPanels: number
-  existingPanels: GeneratedPanel[]
-}) => {
-  if (!preset) throw new Error('Preset is required')
-  if (nbPanelsToGenerate <= 0) throw new Error('Number of panels must be positive')
-  if (maxNbPanels < nbPanelsToGenerate) throw new Error('Max panels cannot be less than panels to generate')
-  if (existingPanels.length + nbPanelsToGenerate > maxNbPanels) {
-    throw new Error('Total number of panels would exceed maximum')
-  }
-}
+const MAX_RETRIES = 3;
+const BASE_DELAY = 2000; // ms
 
 export const predictNextPanels = async ({
   preset,
@@ -66,76 +22,91 @@ export const predictNextPanels = async ({
   existingPanels: GeneratedPanel[]
   llmVendorConfig: LLMVendorConfig
 }): Promise<GeneratedPanel[]> => {
-  try {
-    // 验证输入
-    validateInput({ preset, nbPanelsToGenerate, maxNbPanels, existingPanels })
 
-    const existingPanelsTemplate = existingPanels.length
-      ? ` To help you, here are the previous panels: ${JSON.stringify(existingPanels, null, 2)}`
-      : ''
+  const existingPanelsTemplate = existingPanels.length
+    ? ` To help you, here are the previous panels, their speeches and captions: ${JSON.stringify(existingPanels, null, 2)}`
+    : '';
 
-    const firstNextOrLast =
-      existingPanels.length === 0
-        ? "first"
-        : (maxNbPanels - existingPanels.length) === maxNbPanels
-        ? "last"
-        : "next"
+  const firstNextOrLast =
+    existingPanels.length === 0
+      ? "first"
+      : (maxNbPanels - existingPanels.length) === maxNbPanels
+      ? "last"
+      : "next";
 
-    const systemPrompt = getSystemPrompt({
-      preset,
-      firstNextOrLast,
-      maxNbPanels,
-      nbPanelsToGenerate,
-    })
+  const systemPrompt = getSystemPrompt({
+    preset,
+    firstNextOrLast,
+    maxNbPanels,
+    nbPanelsToGenerate,
+  });
 
-    const userPrompt = getUserPrompt({
-      prompt,
-      existingPanelsTemplate,
-    })
+  const userPrompt = getUserPrompt({
+    prompt,
+    existingPanelsTemplate,
+  });
 
-    const nbTokensPerPanel = 200
-    const nbMaxNewTokens = nbPanelsToGenerate * nbTokensPerPanel
+  const nbTokensPerPanel = 200;
+  const nbMaxNewTokens = nbPanelsToGenerate * nbTokensPerPanel;
+  
+  let result = "";
+  let retryCount = 0;
 
-    // 使用重试机制调用 predict
-    const result = await retryWithExponentialBackoff(async () => {
-      const response = await predict({
-        systemPrompt,
+  while (retryCount < MAX_RETRIES) {
+    try {
+      result = await predict({
+        systemPrompt: retryCount === 0 ? systemPrompt : systemPrompt + " \n ",
         userPrompt,
         nbMaxNewTokens,
         llmVendorConfig
-      })
+      });
+
+      result = result.trim();
       
-      if (!response || typeof response !== 'string' || !response.trim()) {
-        throw new Error('Empty or invalid response from LLM')
+      if (!result) {
+        throw new Error(`Empty result on attempt ${retryCount + 1}`);
+      }
+
+      console.log(`LLM result (attempt ${retryCount + 1}):`, result);
+      break;
+
+    } catch (err) {
+      retryCount++;
+      console.error(`Prediction failed on attempt ${retryCount}:`, err);
+      
+      if (retryCount === MAX_RETRIES) {
+        throw new Error(`Failed to generate story after ${MAX_RETRIES} attempts: ${err}`);
       }
       
-      return response.trim()
-    })
-
-    const cleanedJson = cleanJson(result)
-    let generatedPanels: GeneratedPanel[] = []
-
-    try {
-      generatedPanels = dirtyGeneratedPanelsParser(cleanedJson)
-    } catch (err) {
-      // 降级处理
-      generatedPanels = cleanedJson.split("*")
-        .map((item, i) => ({
-          panel: i,
-          caption: item.trim(),
-          speech: item.trim(),
-          instructions: item.trim(),
-        }))
+      await sleep(BASE_DELAY * Math.pow(2, retryCount - 1)); // 指数退避
     }
-
-    // 验证生成的面板数量
-    if (generatedPanels.length !== nbPanelsToGenerate) {
-      throw new Error(`Generated panels count mismatch: expected ${nbPanelsToGenerate}, got ${generatedPanels.length}`)
-    }
-
-    return generatedPanels.map(res => dirtyGeneratedPanelCleaner(res))
-  } catch (error) {
-    console.error('Error in predictNextPanels:', error)
-    throw error
   }
+
+  const tmp = cleanJson(result);
+  let generatedPanels: GeneratedPanel[] = [];
+
+  try {
+    generatedPanels = dirtyGeneratedPanelsParser(tmp);
+    
+    if (!generatedPanels.length) {
+      throw new Error("No panels generated after parsing");
+    }
+    
+  } catch (err) {
+    console.error("Failed to parse LLM response:", err);
+    console.error("Original response:", result);
+
+    // 降级解析方案
+    generatedPanels = tmp.split("*")
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+      .map((cap, i) => ({
+        panel: i,
+        caption: cap,
+        speech: cap,
+        instructions: cap,
+      }));
+  }
+
+  return generatedPanels.map(res => dirtyGeneratedPanelCleaner(res));
 }
