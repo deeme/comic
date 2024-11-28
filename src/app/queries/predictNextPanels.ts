@@ -66,7 +66,6 @@ export const predictNextPanels = async ({
     result = `${await predict({
       systemPrompt,
       userPrompt,
-      //nbMaxNewTokens,
       llmVendorConfig
     })}`.trim()
     console.log("LLM result (1st trial):", result)
@@ -82,7 +81,6 @@ export const predictNextPanels = async ({
       result = `${await predict({
         systemPrompt: systemPrompt + " \n ",
         userPrompt,
-        //nbMaxNewTokens,
         llmVendorConfig
       })}`.trim()
       console.log("LLM result (2nd trial):", result)
