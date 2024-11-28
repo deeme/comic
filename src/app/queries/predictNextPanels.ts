@@ -109,6 +109,6 @@ export const predictNextPanels = async ({
       await sleep(Math.min(2000 * Math.pow(1.5, retryCount), 30000))
       return attemptPredict(retryCount + 1)
     }
-    return attemptPredict(0) // 开始第一次尝试
   }
+  return attemptPredict(0) // 开始第一次尝试
 }
