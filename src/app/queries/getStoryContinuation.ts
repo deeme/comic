@@ -4,8 +4,6 @@ import { predictNextPanels } from "./predictNextPanels"
 import { joinWords } from "@/lib/joinWords"
 import { sleep } from "@/lib/sleep"
 
-const DEFAULT_TIMEOUT = 30000 // 30 seconds
-
 export const getStoryContinuation = async ({
   preset,
   stylePrompt = "",
@@ -13,63 +11,54 @@ export const getStoryContinuation = async ({
   nbPanelsToGenerate,
   maxNbPanels,
   existingPanels = [],
-  llmVendorConfig,
-  timeout = DEFAULT_TIMEOUT
+  llmVendorConfig
 }: {
-  preset: Preset
-  stylePrompt?: string
-  userStoryPrompt?: string
-  nbPanelsToGenerate: number
-  maxNbPanels: number
-  existingPanels?: GeneratedPanel[]
+  preset: Preset;
+  stylePrompt?: string;
+  userStoryPrompt?: string;
+  nbPanelsToGenerate: number;
+  maxNbPanels: number;
+  existingPanels?: GeneratedPanel[];
   llmVendorConfig: LLMVendorConfig
-  timeout?: number
 }): Promise<GeneratedPanel[]> => {
-  // 添加超时控制
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Operation timed out')), timeout)
-  })
+
+  let panels: GeneratedPanel[] = []
+  const startAt: number = (existingPanels.length + 1) || 0
+  const endAt: number = startAt + nbPanelsToGenerate
 
   try {
-    // 基本验证
-    if (nbPanelsToGenerate <= 0) throw new Error('Invalid number of panels to generate')
-    if (maxNbPanels < nbPanelsToGenerate) throw new Error('Invalid max panels number')
 
-    const startAt: number = (existingPanels?.length + 1) || 0
-    const endAt: number = startAt + nbPanelsToGenerate
+    const prompt = joinWords([ userStoryPrompt ])
 
-    const prompt = joinWords([userStoryPrompt])
+    const panelCandidates: GeneratedPanel[] = await predictNextPanels({
+      preset,
+      prompt,
+      nbPanelsToGenerate,
+      maxNbPanels,
+      existingPanels,
+      llmVendorConfig,
+    })
 
-    // 使用 Promise.race 实现超时控制
-    const panelCandidates = await Promise.race([
-      predictNextPanels({
-        preset,
-        prompt,
-        nbPanelsToGenerate,
-        maxNbPanels,
-        existingPanels,
-        llmVendorConfig,
-      }),
-      timeoutPromise
-    ]) as GeneratedPanel[]
+    // console.log("LLM responded with panelCandidates:", panelCandidates)
 
-    return panelCandidates.map((candidate, i) => ({
-      panel: startAt + i,
-      instructions: candidate?.instructions || "",
-      speech: candidate?.speech || "",
-      caption: candidate?.caption || "",
-    }))
-
-  } catch (error) {
-    console.error('Error in getStoryContinuation:', error)
+    // we clean the output from the LLM
+    // most importantly, we need to adjust the panel index,
+    // to start from where we last finished
+    for (let i = 0; i < nbPanelsToGenerate; i++) {
+      panels.push({
+        panel: startAt + i,
+        instructions: `${panelCandidates[i]?.instructions || ""}`,
+        speech: `${panelCandidates[i]?.speech || ""}`,
+        caption: `${panelCandidates[i]?.caption || ""}`,
+      })
+    }
     
-    // 降级处理
-    const degradedPanels: GeneratedPanel[] = []
-    const startAt = (existingPanels?.length + 1) || 0
-    const endAt = startAt + nbPanelsToGenerate
-
-    for (let p = startAt; p < endAt; p++) {
-      degradedPanels.push({
+  } catch (err) {
+    // console.log("LLM step failed due to:", err)
+    // console.log("we are now switching to a degraded mode, using 4 similar panels")
+    panels = []
+    for (let p = startAt; p < endAt && p; p++) {
+      panels.push({
         panel: p,
         instructions: joinWords([
           stylePrompt,
@@ -77,11 +66,12 @@ export const getStoryContinuation = async ({
           `${".".repeat(p)}`,
         ]),
         speech: "...",
-        caption: `(Error: ${error.message || 'Unknown error'} - Using degraded mode)`
+        caption: "(Sorry, LLM generation failed: using degraded mode)"
       })
     }
-
     await sleep(2000)
-    return degradedPanels
+    // console.error(err)
+  } finally {
+    return panels
   }
 }
