@@ -53,46 +53,36 @@ export const predictNextPanels = async ({
     existingPanelsTemplate,
   })
 
-  let result = ""
-
   // we don't require a lot of token for our task,
   // but to be safe, let's count ~200 tokens per panel
   const nbTokensPerPanel = 200
 
   const nbMaxNewTokens = nbPanelsToGenerate * nbTokensPerPanel
 
-  try {
-    // console.log(`calling predict:`, { systemPrompt, userPrompt, nbMaxNewTokens })
-    result = `${await predict({
-      systemPrompt,
-      userPrompt,
-      nbMaxNewTokens,
-      llmVendorConfig
-    })}`.trim()
-    console.log("LLM result (1st trial):", result)
-    if (!result.length) {
-      throw new Error("empty result on 1st trial!")
-    }
-  } catch (err) {
-    // console.log(`prediction of the story failed, trying again..`)
-    // this should help throttle things on a bit on the LLM API side
-    await sleep(200000)
+  let maxRetries = 5;
+  let result = "";
 
+  while (maxRetries > 0) {
     try {
       result = `${await predict({
-        systemPrompt: systemPrompt + " \n ",
+        systemPrompt,
         userPrompt,
         nbMaxNewTokens,
         llmVendorConfig
-      })}`.trim()
-      console.log("LLM result (2nd trial):", result)
-      if (!result.length) {
-        throw new Error("empty result on 2nd trial!")
+      })}`.trim();
+      console.log("LLM result (trial #", 4 - maxRetries, "):", result);
+      if (result.length) {
+        break;
       }
     } catch (err) {
-      console.error(`prediction of the story failed twice 💩`)
-      throw new Error(`failed to generate the story twice 💩 ${err}`)
+      console.error(`prediction of the story failed, retrying... (${4 - maxRetries} trials left)`);
+      await sleep(2000);
     }
+    maxRetries--;
+  }
+
+  if (!result.length) {
+    throw new Error("failed to generate the story after multiple trials 💩");
   }
 
   // console.log("Raw response from LLM:", result)
