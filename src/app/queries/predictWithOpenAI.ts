@@ -8,14 +8,14 @@ import { LLMPredictionFunctionParams } from "@/types"
 const FALLBACK_MODELS = [
   process.env.LLM_OPENAI_API_MODEL || "claude-3-5-sonnet-20240620",
   process.env.LLM_OPENAI_API_MODEL1 || "lmsys/claude-3-5-sonnet-20241022",
-  process.env.LLM_OPENAI_API_MODEL2 || "lmsys/claude-3-5-haiku-20241022",
-  process.env.LLM_OPENAI_API_MODEL3 || "lmsys/claude-3-5-sonnet-20240620",
-  process.env.LLM_OPENAI_API_MODEL4 || "o1-preview-all",
-  process.env.LLM_OPENAI_API_MODEL5 || "o1-mini-all",
-  process.env.LLM_OPENAI_API_MODEL6 || "gpt-4o-all",
-  process.env.LLM_OPENAI_API_MODEL7 || "gpt-4-all",
-  process.env.LLM_OPENAI_API_MODEL8 || "gpt-4o-mini",
-  process.env.LLM_OPENAI_API_MODEL9 || "claude-3-haiku-20240307"
+  process.env.LLM_OPENAI_API_MODEL2 || "lmsys/claude-3-5-sonnet-20240620",
+  process.env.LLM_OPENAI_API_MODEL3 || "lmsys/claude-3-opus-20240229",
+  process.env.LLM_OPENAI_API_MODEL4 || "lmsys/gemini-2.0-flash-exp",
+  process.env.LLM_OPENAI_API_MODEL5 || "gemini-2.0-flash-exp",
+  process.env.LLM_OPENAI_API_MODEL6 || "gpt-4o",
+  process.env.LLM_OPENAI_API_MODEL7 || "gpt-4-vision-preview",
+  process.env.LLM_OPENAI_API_MODEL8 || "claude-3-haiku-20240307",
+  process.env.LLM_OPENAI_API_MODEL9 || "gpt-4o-mini",
 ]
 
 // 创建单次调用函数
